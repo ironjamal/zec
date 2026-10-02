@@ -12,6 +12,7 @@
     "category": "{{PROJECT_CATEGORY}}",
     "description": "{{PROJECT_DESCRIPTION}}",
     "image": "{{PROJECT_IMAGE}}",
+    "imageAlt": "{{PROJECT_IMAGE_ALT}}",
     "url": "{{PROJECT_URL}}"
   },
   "showTeam": false,
