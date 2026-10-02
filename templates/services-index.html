@@ -16,11 +16,11 @@
   <meta name="twitter:title" content="{{TITLE}}">
   <meta name="twitter:description" content="{{DESCRIPTION}}">
   <meta name="twitter:image" content="{{OG_IMAGE}}">
-  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="icon" type="image/png" href="{{BASE_PATH}}/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/assets/design.css">
+  <link rel="stylesheet" href="{{BASE_PATH}}/assets/design.css">
   {{JSONLD}}
 </head>
 <body>
@@ -29,7 +29,7 @@
   {{HEADER}}
   <main id="main" class="services-hub-page">
     <section class="hero service-hero" id="top" aria-labelledby="hero-title">
-      <div class="hero-media" aria-hidden="true"><picture><source media="(max-width: 640px)" srcset="/assets/zec-hero-architecture.webp"><img src="/assets/zec-architecture-break.webp" alt="" width="1800" height="990" fetchpriority="high" decoding="async"></picture></div>
+      <div class="hero-media" aria-hidden="true"><picture><source media="(max-width: 640px)" srcset="{{BASE_PATH}}/assets/zec-hero-architecture.webp"><img src="{{BASE_PATH}}/assets/zec-architecture-break.webp" alt="" width="1800" height="990" fetchpriority="high" decoding="async"></picture></div>
       <div class="hero-shade" aria-hidden="true"></div>
       <div class="hero-frame">
         <div class="hero-topline"><span class="hero-kicker">Independent digital studio</span><span class="hero-coordinates">Strategy&nbsp; / &nbsp;Design&nbsp; / &nbsp;Development</span></div>
@@ -61,4 +61,3 @@
   {{SCRIPT}}
 </body>
 </html>
-

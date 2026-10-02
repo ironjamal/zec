@@ -3,8 +3,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node scripts/build.mjs",
-    "check": "node scripts/check-site.mjs"
+    "build": "node scripts/build.mjs --target vercel",
+    "build:vercel": "node scripts/build.mjs --target vercel",
+    "build:github-pages": "node scripts/build.mjs --target github-pages",
+    "check": "node scripts/check-site.mjs --target vercel",
+    "check:vercel": "node scripts/check-site.mjs --target vercel",
+    "check:github-pages": "node scripts/check-site.mjs --target github-pages"
   }
 }
-

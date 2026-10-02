@@ -2,83 +2,171 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const services = JSON.parse(fs.readFileSync(path.join(root, "data", "services.json"), "utf8"));
-const config = JSON.parse(fs.readFileSync(path.join(root, "data", "site-config.json"), "utf8"));
-const siteUrl = (process.env.SITE_URL || config.siteUrl).replace(/\/$/, "");
-const pages = [
-  { file: "index.html", url: `${siteUrl}/` },
-  { file: "services/index.html", url: `${siteUrl}/services` },
-  ...services.map((service) => ({ file: `services/${service.slug}/index.html`, url: `${siteUrl}/services/${service.slug}` }))
-];
+const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+const outputRoot = path.join(repoRoot, "dist");
+const services = JSON.parse(fs.readFileSync(path.join(repoRoot, "data", "services.json"), "utf8"));
+const siteConfig = JSON.parse(fs.readFileSync(path.join(repoRoot, "data", "site-config.json"), "utf8"));
+const targetIndex = process.argv.indexOf("--target");
+const target = process.env.BUILD_TARGET || (targetIndex >= 0 ? process.argv[targetIndex + 1] : "vercel");
+const targetConfig = siteConfig.targets?.[target];
+if (!targetConfig) throw new Error(`Unknown build target: ${target}. Use vercel or github-pages.`);
+const siteUrl = (process.env.SITE_URL || targetConfig.siteUrl || siteConfig.siteUrl).replace(/\/$/, "");
+const baseValue = process.env.BASE_PATH ?? targetConfig.basePath ?? siteConfig.basePath ?? "";
+const basePath = String(baseValue || "").trim().replace(/^\/+|\/+$/g, "");
+const basePrefix = basePath ? `/${basePath}` : "";
+const siteOrigin = new URL(siteUrl).origin;
+const sitePathname = new URL(siteUrl).pathname.replace(/\/$/, "");
 const errors = [];
 const titles = new Set();
-const canonicals = new Set();
+const canonicalUrls = new Set();
+const routes = ["/", "/services", ...services.map((service) => `/services/${service.slug}`)];
 
-function sourceFileForUrl(rawUrl) {
-  const pathname = decodeURIComponent(rawUrl || "/").split("?")[0].replace(/\/$/, "") || "/";
-  let target = path.join(root, pathname.replace(/^\//, ""));
-  if (fs.existsSync(target) && fs.statSync(target).isDirectory()) target = path.join(target, "index.html");
-  else if (!path.extname(target) && fs.existsSync(path.join(target, "index.html"))) target = path.join(target, "index.html");
-  return target;
+if (sitePathname !== basePrefix) errors.push(`SITE_URL path (${sitePathname || "(empty)"}) does not match BASE_PATH (${basePrefix || "(empty)"}).`);
+
+function absoluteSiteUrl(route) {
+  const normalized = `/${String(route || "").replace(/^\/+/, "")}`;
+  return `${siteUrl}${normalized}`;
 }
 
+function pageFile(route) {
+  if (route === "/") return path.join(outputRoot, "index.html");
+  const relative = route.replace(/^\/+/, "");
+  return path.join(outputRoot, relative, "index.html");
+}
+
+function resolveLocalPath(pathname) {
+  let routePath = decodeURIComponent(pathname || "/").split("?")[0];
+  if (basePrefix) {
+    if (routePath === basePrefix || routePath === `${basePrefix}/`) routePath = "/";
+    else if (routePath.startsWith(`${basePrefix}/`)) routePath = routePath.slice(basePrefix.length);
+    else return null;
+  }
+  routePath = routePath.replace(/\/$/, "") || "/";
+  const relative = routePath.replace(/^\/+/, "");
+  const direct = path.resolve(outputRoot, relative || "index.html");
+  if (direct !== outputRoot && !direct.startsWith(`${outputRoot}${path.sep}`)) return null;
+  if (fs.existsSync(direct) && fs.statSync(direct).isFile()) return direct;
+  if (fs.existsSync(direct) && fs.statSync(direct).isDirectory()) {
+    const indexFile = path.join(direct, "index.html");
+    if (fs.existsSync(indexFile)) return indexFile;
+  }
+  if (!path.extname(direct)) {
+    const htmlFile = `${direct}.html`;
+    if (fs.existsSync(htmlFile) && fs.statSync(htmlFile).isFile()) return htmlFile;
+  }
+  return null;
+}
+
+function collectSchemaUrls(value, results = []) {
+  if (Array.isArray(value)) value.forEach((item) => collectSchemaUrls(item, results));
+  else if (value && typeof value === "object") {
+    for (const [key, child] of Object.entries(value)) {
+      if ((key === "url" || key === "logo") && typeof child === "string") results.push(child);
+      else collectSchemaUrls(child, results);
+    }
+  }
+  return results;
+}
+
+if (!fs.existsSync(outputRoot)) throw new Error("Missing dist output. Run the target build before checking.");
+
+const pages = routes.map((route) => ({ route, file: pageFile(route), url: absoluteSiteUrl(route) }));
 for (const page of pages) {
-  const absolutePath = path.join(root, page.file);
-  if (!fs.existsSync(absolutePath)) { errors.push(`Missing page: ${page.file}`); continue; }
-  const html = fs.readFileSync(absolutePath, "utf8");
+  if (!fs.existsSync(page.file)) { errors.push(`Missing page output: ${path.relative(outputRoot, page.file)}`); continue; }
+  const html = fs.readFileSync(page.file, "utf8");
   const title = html.match(/<title>([^<]+)<\/title>/i)?.[1] || "";
   const description = html.match(/<meta\s+name="description"\s+content="([^"]*)"/i)?.[1] || "";
   const canonical = html.match(/<link\s+rel="canonical"\s+href="([^"]+)"/i)?.[1] || "";
+  const ogUrl = html.match(/<meta\s+property="og:url"\s+content="([^"]+)"/i)?.[1] || "";
   const ogImage = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/i)?.[1] || "";
   const twitterImage = html.match(/<meta\s+name="twitter:image"\s+content="([^"]+)"/i)?.[1] || "";
-  if (!title || !description || !canonical) errors.push(`Missing title, description or canonical: ${page.file}`);
-  if (canonical !== page.url) errors.push(`Incorrect canonical in ${page.file}: ${canonical}`);
+  if (!title || !description || !canonical) errors.push(`Missing title, description or canonical: ${page.route}`);
+  if (canonical !== page.url) errors.push(`Incorrect canonical in ${page.route}: ${canonical}`);
+  if (ogUrl !== page.url) errors.push(`Incorrect og:url in ${page.route}: ${ogUrl}`);
   if (titles.has(title)) errors.push(`Duplicate title: ${title}`);
-  if (canonicals.has(canonical)) errors.push(`Duplicate canonical: ${canonical}`);
-  titles.add(title); canonicals.add(canonical);
-  if (!/^https?:\/\//i.test(ogImage) || ogImage !== twitterImage) errors.push(`Open Graph/Twitter image must be the same absolute URL: ${page.file}`);
-  if ((html.match(/<h1\b/gi) || []).length !== 1) errors.push(`Expected exactly one H1: ${page.file}`);
-  if (/\{\{[A-Z0-9_]+\}\}/.test(html)) errors.push(`Unresolved template token: ${page.file}`);
+  if (canonicalUrls.has(canonical)) errors.push(`Duplicate canonical: ${canonical}`);
+  titles.add(title); canonicalUrls.add(canonical);
+  const expectedImage = absoluteSiteUrl("/assets/og-image.jpg");
+  if (ogImage !== expectedImage || twitterImage !== expectedImage) errors.push(`Open Graph/Twitter image does not match target SITE_URL: ${page.route}`);
+  if ((html.match(/<h1\b/gi) || []).length !== 1) errors.push(`Expected exactly one H1: ${page.route}`);
+  if (/\{\{[^}]*\}\}|\bundefined\b|\bnull\b/i.test(html)) errors.push(`Raw placeholder/undefined/null in ${page.route}`);
 
   const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]));
-  for (const match of html.matchAll(/\b(?:href|src)="([^"]+)"/g)) {
+  for (const match of html.matchAll(/\b(?:href|src|srcset)="([^"]+)"/g)) {
     const raw = match[1].replaceAll("&amp;", "&");
-    if (/^(?:https?:|mailto:|tel:|data:|javascript:)/i.test(raw)) continue;
-    const [targetPart, fragment] = raw.split("#", 2);
-    if (raw.startsWith("#") || (!targetPart && fragment)) {
-      if (fragment && !ids.has(fragment)) errors.push(`Missing anchor #${fragment} in ${page.file}`);
+    if (/^(?:https?:|mailto:|tel:|data:|javascript:|\/\/)/i.test(raw)) {
+      if (/^https?:/i.test(raw)) {
+        const parsedExternal = new URL(raw);
+        if (parsedExternal.origin === siteOrigin) {
+          if (basePrefix && !(parsedExternal.pathname === basePrefix || parsedExternal.pathname.startsWith(`${basePrefix}/`))) errors.push(`Same-site absolute link escapes BASE_PATH: ${raw} in ${page.route}`);
+          if (!resolveLocalPath(parsedExternal.pathname)) errors.push(`Broken same-site URL ${raw} in ${page.route}`);
+        }
+      }
       continue;
     }
-    if (!targetPart) continue;
-    const target = sourceFileForUrl(targetPart);
-    if (!fs.existsSync(target) || !fs.statSync(target).isFile()) errors.push(`Broken local link ${raw} in ${page.file}`);
-    else if (fragment && target === absolutePath && !ids.has(fragment)) errors.push(`Missing anchor #${fragment} in ${page.file}`);
-    else if (fragment && target !== absolutePath && target.endsWith("index.html")) {
-      const targetHtml = fs.readFileSync(target, "utf8");
-      if (!new RegExp(`\\bid="${fragment.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}"`).test(targetHtml)) errors.push(`Missing anchor ${raw} in ${page.file}`);
+    const [targetPart, fragment] = raw.split("#", 2);
+    if (!targetPart) {
+      if (fragment && !ids.has(fragment)) errors.push(`Missing anchor #${fragment} in ${page.route}`);
+      continue;
+    }
+    let parsed;
+    try { parsed = new URL(targetPart, `${siteUrl}${page.route === "/" ? "/" : page.route}`); }
+    catch { errors.push(`Invalid local URL ${raw} in ${page.route}`); continue; }
+    if (parsed.origin !== siteOrigin) continue;
+    if (basePrefix && !(parsed.pathname === basePrefix || parsed.pathname.startsWith(`${basePrefix}/`))) errors.push(`Internal link escapes BASE_PATH: ${raw} in ${page.route}`);
+    const targetFile = resolveLocalPath(parsed.pathname);
+    if (!targetFile) errors.push(`Broken internal link ${raw} in ${page.route}`);
+    else if (fragment) {
+      const targetHtml = fs.readFileSync(targetFile, "utf8");
+      const targetIds = new Set([...targetHtml.matchAll(/\bid="([^"]+)"/g)].map((item) => item[1]));
+      if (!targetIds.has(fragment)) errors.push(`Missing anchor ${raw} in ${page.route}`);
     }
   }
 
   const schemaScripts = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
-  if (page.file === "index.html" && !schemaScripts.some((item) => JSON.parse(item[1])["@type"] === "Organization")) errors.push("Homepage is missing Organization JSON-LD.");
-  if (page.file.startsWith("services/") && !page.file.endsWith("services/index.html")) {
-    const types = schemaScripts.map((item) => JSON.parse(item[1])["@type"]);
-    if (!types.includes("Service") || !types.includes("FAQPage")) errors.push(`Missing Service/FAQPage JSON-LD: ${page.file}`);
+  let schemaTypes = [];
+  let schemaUrls = [];
+  try {
+    const schemas = schemaScripts.map((item) => JSON.parse(item[1]));
+    schemaTypes = schemas.map((schema) => schema["@type"]);
+    schemaUrls = schemas.flatMap((schema) => collectSchemaUrls(schema));
+  } catch (error) { errors.push(`Invalid JSON-LD in ${page.route}: ${error.message}`); }
+  if (page.route === "/" && !schemaTypes.includes("Organization")) errors.push("Homepage is missing Organization JSON-LD.");
+  if (page.route.startsWith("/services/") && (!schemaTypes.includes("Service") || !schemaTypes.includes("FAQPage"))) errors.push(`Missing Service/FAQPage JSON-LD: ${page.route}`);
+  for (const schemaUrl of schemaUrls) if (!schemaUrl.startsWith(`${siteUrl}/`)) errors.push(`JSON-LD URL uses a different SITE_URL in ${page.route}: ${schemaUrl}`);
+}
+
+const notFoundFile = path.join(outputRoot, "404.html");
+if (!fs.existsSync(notFoundFile)) errors.push("Missing branded 404.html.");
+else {
+  const notFound = fs.readFileSync(notFoundFile, "utf8");
+  if ((notFound.match(/<h1\b/gi) || []).length !== 1) errors.push("Expected exactly one H1 in 404.html.");
+  if (/\{\{[^}]*\}\}|\bundefined\b|\bnull\b/i.test(notFound)) errors.push("Raw placeholder/undefined/null in 404.html.");
+  for (const match of notFound.matchAll(/\b(?:href|src|srcset)="([^"]+)"/g)) {
+    const raw = match[1].replaceAll("&amp;", "&");
+    if (/^(?:https?:|mailto:|tel:|data:|javascript:|\/\/)/i.test(raw)) continue;
+    const targetPart = raw.split("#", 1)[0];
+    if (!targetPart) continue;
+    const parsed = new URL(targetPart, siteUrl);
+    if (basePrefix && !(parsed.pathname === basePrefix || parsed.pathname.startsWith(`${basePrefix}/`))) errors.push(`404.html internal link escapes BASE_PATH: ${raw}`);
+    if (!resolveLocalPath(parsed.pathname)) errors.push(`Broken 404.html internal link: ${raw}`);
   }
 }
 
-const sitemap = fs.readFileSync(path.join(root, "sitemap.xml"), "utf8");
+const sitemapFile = path.join(outputRoot, "sitemap.xml");
+const sitemap = fs.existsSync(sitemapFile) ? fs.readFileSync(sitemapFile, "utf8") : "";
 const sitemapUrls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
-if (sitemapUrls.length !== pages.length || pages.some((page) => !sitemapUrls.includes(page.url))) errors.push("Sitemap does not list every generated page exactly once.");
-if (!fs.readFileSync(path.join(root, "robots.txt"), "utf8").includes(`${siteUrl}/sitemap.xml`)) errors.push("robots.txt does not point to the sitemap.");
-const ogPath = path.join(root, "assets", "og-image.jpg");
-if (!fs.existsSync(ogPath)) errors.push("Missing 1200×630 share image.");
+if (sitemapUrls.length !== pages.length || pages.some((page) => !sitemapUrls.includes(page.url))) errors.push("Sitemap does not list every generated page exactly once for this SITE_URL.");
+if (sitemapUrls.some((url) => !url.startsWith(`${siteUrl}/`))) errors.push("Sitemap URL escapes SITE_URL.");
+const robotsFile = path.join(outputRoot, "robots.txt");
+if (!fs.existsSync(robotsFile) || !fs.readFileSync(robotsFile, "utf8").includes(`${siteUrl}/sitemap.xml`)) errors.push("robots.txt does not point to the target sitemap.");
+for (const asset of ["logo.png", "favicon.png", "assets/zec-architecture-break.webp", "assets/zec-hero-architecture.webp", "assets/og-image.jpg", "assets/design.css"]) {
+  if (!fs.existsSync(path.join(outputRoot, asset))) errors.push(`Missing built asset: ${asset}`);
+}
 
 if (errors.length) {
   console.error(errors.map((error) => `- ${error}`).join("\n"));
   process.exitCode = 1;
 } else {
-  console.log(`Checked ${pages.length} pages, unique metadata, JSON-LD, sitemap and local links. No issues found.`);
+  console.log(`Checked ${pages.length} ${target} pages, SITE_URL, BASE_PATH, metadata, JSON-LD, sitemap, placeholders and internal links. No issues found.`);
 }
-

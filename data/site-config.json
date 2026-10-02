@@ -1,5 +1,16 @@
 {
   "siteUrl": "https://zeceg.vercel.app",
+  "basePath": "",
+  "targets": {
+    "vercel": {
+      "siteUrl": "https://zeceg.vercel.app",
+      "basePath": ""
+    },
+    "github-pages": {
+      "siteUrl": "https://ironjamal.github.io/zec",
+      "basePath": "/zec"
+    }
+  },
   "projectFormUrl": "https://docs.google.com/forms/d/e/1FAIpQLScEimmQcJ5gNqr6mEWS4R6MxZFv5MR0CuxHeQQpt6AZggRN8A/viewform?usp=header",
   "contact": {
     "whatsappNumber": "{{WHATSAPP_NUMBER}}",
@@ -23,4 +34,3 @@
     "photoAlt": "{{TEAM_MEMBER_PHOTO_ALT}}"
   }
 }
-

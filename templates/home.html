@@ -16,13 +16,13 @@
   <meta name="twitter:title" content="{{TITLE}}">
   <meta name="twitter:description" content="{{DESCRIPTION}}">
   <meta name="twitter:image" content="{{OG_IMAGE}}">
-  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="icon" type="image/png" href="{{BASE_PATH}}/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="preload" as="image" href="/assets/zec-architecture-break.webp" media="(min-width: 641px)" fetchpriority="high">
-  <link rel="preload" as="image" href="/assets/zec-hero-architecture.webp" media="(max-width: 640px)" fetchpriority="high">
-  <link rel="stylesheet" href="/assets/design.css">
+  <link rel="preload" as="image" href="{{BASE_PATH}}/assets/zec-architecture-break.webp" media="(min-width: 641px)" fetchpriority="high">
+  <link rel="preload" as="image" href="{{BASE_PATH}}/assets/zec-hero-architecture.webp" media="(max-width: 640px)" fetchpriority="high">
+  <link rel="stylesheet" href="{{BASE_PATH}}/assets/design.css">
   {{JSONLD}}
 </head>
 <body>
@@ -35,8 +35,8 @@
     <section class="hero" id="top" aria-labelledby="hero-title">
       <div class="hero-media" aria-hidden="true">
         <picture>
-          <source media="(max-width: 640px)" srcset="/assets/zec-hero-architecture.webp">
-          <img src="/assets/zec-architecture-break.webp" alt="" width="1800" height="990" fetchpriority="high" decoding="async">
+          <source media="(max-width: 640px)" srcset="{{BASE_PATH}}/assets/zec-hero-architecture.webp">
+          <img src="{{BASE_PATH}}/assets/zec-architecture-break.webp" alt="" width="1800" height="990" fetchpriority="high" decoding="async">
         </picture>
       </div>
       <div class="hero-shade" aria-hidden="true"></div>
@@ -91,25 +91,25 @@
         </div>
       </div>
       <div class="container solutions-list" aria-label="Choose a digital solution by need">
-        <a class="solution-row reveal" href="#contact" aria-label="Discuss a website or landing page project">
+        <a class="solution-row reveal" href="{{BASE_PATH}}/services/websites" aria-label="Explore website and landing page services">
           <span class="solution-number">01</span>
           <div class="solution-copy"><h3>Make the offer clear.</h3><p>Help people understand what you do and what to do next.</p></div>
           <div class="solution-fit"><span>Start with</span><strong>Website / Landing page</strong></div>
           <span class="solution-arrow" aria-hidden="true">↗</span>
         </a>
-        <a class="solution-row reveal" href="#contact" aria-label="Discuss a web application or dashboard project">
+        <a class="solution-row reveal" href="{{BASE_PATH}}/services/web-applications" aria-label="Explore web application and dashboard services">
           <span class="solution-number">02</span>
           <div class="solution-copy"><h3>Make a task easier.</h3><p>Bring repeat work and slow handoffs into a tool built around the process.</p></div>
           <div class="solution-fit"><span>Start with</span><strong>Web application / Dashboard</strong></div>
           <span class="solution-arrow" aria-hidden="true">↗</span>
         </a>
-        <a class="solution-row reveal" href="#contact" aria-label="Discuss an e-commerce project">
+        <a class="solution-row reveal" href="{{BASE_PATH}}/services/e-commerce" aria-label="Explore e-commerce services">
           <span class="solution-number">03</span>
           <div class="solution-copy"><h3>Sell with less friction.</h3><p>Make it easier to discover, compare and buy your products.</p></div>
           <div class="solution-fit"><span>Start with</span><strong>E-commerce / Digital storefront</strong></div>
           <span class="solution-arrow" aria-hidden="true">↗</span>
         </a>
-        <a class="solution-row reveal" href="#contact" aria-label="Discuss a digital platform or custom system project">
+        <a class="solution-row reveal" href="{{BASE_PATH}}/services/custom-systems" aria-label="Explore custom systems services">
           <span class="solution-number">04</span>
           <div class="solution-copy"><h3>Connect the operation.</h3><p>Bring people, tools and services into one coherent system.</p></div>
           <div class="solution-fit"><span>Start with</span><strong>Platform / Custom system</strong></div>
@@ -177,7 +177,7 @@
 
     <section class="visual-break" data-header-tone="dark" aria-label="Architectural visual interlude">
       <div class="break-media reveal-mask">
-        <img src="/assets/zec-hero-architecture.webp" alt="A monochrome view looking up through the geometric concrete structure of a modern building." width="1200" height="1800" loading="lazy" decoding="async">
+        <img src="{{BASE_PATH}}/assets/zec-hero-architecture.webp" alt="A monochrome view looking up through the geometric concrete structure of a modern building." width="1200" height="1800" loading="lazy" decoding="async">
       </div>
       <div class="break-overlay" aria-hidden="true"></div>
       <div class="break-caption"><span>07 / Structure&nbsp; — &nbsp;Photo by <a href="https://unsplash.com/photos/grayscale-photo-of-concrete-building-5LED2xbiKvk" target="_blank" rel="noopener noreferrer">Osman Rana</a></span><strong>Structure<br>in focus.</strong><span>Business&nbsp; / &nbsp;Design&nbsp; / &nbsp;Technology</span></div>
@@ -229,4 +229,3 @@
 
 </body>
 </html>
-

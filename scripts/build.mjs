@@ -5,14 +5,21 @@ import { fileURLToPath } from "node:url";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const dataDir = path.join(repoRoot, "data");
 const templateDir = path.join(repoRoot, "templates");
+const outputDir = path.join(repoRoot, "dist");
 const siteConfig = JSON.parse(fs.readFileSync(path.join(dataDir, "site-config.json"), "utf8"));
 const services = JSON.parse(fs.readFileSync(path.join(dataDir, "services.json"), "utf8"));
 const serviceBySlug = new Map(services.map((service) => [service.slug, service]));
-const SITE_URL = (process.env.SITE_URL || siteConfig.siteUrl).replace(/\/$/, "");
+const targetIndex = process.argv.indexOf("--target");
+const target = process.env.BUILD_TARGET || (targetIndex >= 0 ? process.argv[targetIndex + 1] : "vercel");
+const targetConfig = siteConfig.targets?.[target];
+if (!targetConfig) throw new Error(`Unknown build target: ${target}. Use vercel or github-pages.`);
+const SITE_URL = (process.env.SITE_URL || targetConfig.siteUrl || siteConfig.siteUrl).replace(/\/$/, "");
+const BASE_PATH = normalizeBasePath(process.env.BASE_PATH ?? targetConfig.basePath ?? siteConfig.basePath ?? "");
 const formUrl = siteConfig.projectFormUrl;
 const ogImage = `${SITE_URL}/assets/og-image.jpg`;
 
 if (!/^https?:\/\//i.test(SITE_URL)) throw new Error("SITE_URL must be an absolute http(s) URL.");
+if (new URL(SITE_URL).pathname.replace(/\/$/, "") !== BASE_PATH) throw new Error(`SITE_URL path and BASE_PATH must match (SITE_URL path: ${new URL(SITE_URL).pathname}, BASE_PATH: ${BASE_PATH || "(empty)"}).`);
 if (!Array.isArray(services) || services.length !== 7) throw new Error("Expected seven service records.");
 if (new Set(services.map((service) => service.slug)).size !== services.length) throw new Error("Service slugs must be unique.");
 for (const service of services) {
@@ -27,6 +34,29 @@ for (const service of services) {
 
 function escapeHtml(value = "") {
   return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+}
+
+function normalizeBasePath(value) {
+  const cleaned = String(value || "").trim().replace(/^\/+|\/+$/g, "");
+  if (cleaned && !/^[a-zA-Z0-9._~-]+(?:\/[a-zA-Z0-9._~-]+)*$/.test(cleaned)) throw new Error(`Invalid BASE_PATH: ${value}`);
+  return cleaned ? `/${cleaned}` : "";
+}
+
+function sitePath(route) {
+  const normalized = `/${String(route || "").replace(/^\/+/, "")}`;
+  if (BASE_PATH && (normalized === BASE_PATH || normalized.startsWith(`${BASE_PATH}/`))) return normalized;
+  return `${BASE_PATH}${normalized}`;
+}
+
+function absoluteSiteUrl(route) {
+  const normalized = `/${String(route || "").replace(/^\/+/, "")}`;
+  return `${SITE_URL}${normalized}`;
+}
+
+function pageOutputPath(route) {
+  if (route === "/") return "index.html";
+  const relative = route.replace(/^\/+/, "");
+  return path.join(relative, "index.html");
 }
 
 function jsonLd(value) {
@@ -69,21 +99,22 @@ function contactLinks(className = "contact-links") {
 }
 
 function renderHeader(headerTemplate) {
-  return fill(headerTemplate, { FORM_URL: escapeHtml(formUrl) });
+  return fill(headerTemplate, { FORM_URL: escapeHtml(formUrl), BASE_PATH: escapeHtml(BASE_PATH) });
 }
 
 function renderFooter(footerTemplate) {
-  const serviceLinks = services.map((service) => `<a href="/services/${service.slug}">${escapeHtml(service.name)}</a>`).join("");
-  const footerServices = `<div class="container footer-services"><span class="footer-services-label">Services</span><nav class="footer-service-links" aria-label="Service pages"><a href="/services">All services</a>${serviceLinks}</nav></div>`;
+  const serviceLinks = services.map((service) => `<a href="${sitePath(`/services/${service.slug}`)}">${escapeHtml(service.name)}</a>`).join("");
+  const footerServices = `<div class="container footer-services"><span class="footer-services-label">Services</span><nav class="footer-service-links" aria-label="Service pages"><a href="${sitePath("/services")}">All services</a>${serviceLinks}</nav></div>`;
   return fill(footerTemplate, {
     FORM_URL: escapeHtml(formUrl),
+    BASE_PATH: escapeHtml(BASE_PATH),
     FOOTER_SERVICES: footerServices,
     FOOTER_CONTACT_LINKS: contactLinks("footer-contact-links")
   });
 }
 
 function serviceDirectory() {
-  return services.map((service, index) => `<a class="service-entry${index === 0 ? " is-active" : ""}" href="/services/${service.slug}"><span class="service-no">${service.number}</span><span class="service-name">${escapeHtml(service.name)}</span><span class="service-detail">${escapeHtml(service.summary)}</span><span class="service-arrow" aria-hidden="true">↗</span></a>`).join("\n");
+  return services.map((service, index) => `<a class="service-entry${index === 0 ? " is-active" : ""}" href="${sitePath(`/services/${service.slug}`)}"><span class="service-no">${service.number}</span><span class="service-name">${escapeHtml(service.name)}</span><span class="service-detail">${escapeHtml(service.summary)}</span><span class="service-arrow" aria-hidden="true">↗</span></a>`).join("\n");
 }
 
 function contactSection(className = "contact-links") {
@@ -96,7 +127,7 @@ function optionalWorkSection() {
   const title = isSet(work.title) ? work.title : "Project title to be added";
   const category = isSet(work.category) ? work.category : "Project category to be added";
   const description = isSet(work.description) ? work.description : "Add a real project summary when approved work is ready to share.";
-  const image = normalizeUrl(work.image) || (isSet(work.image) && work.image.startsWith("/") ? work.image : "");
+  const image = normalizeUrl(work.image) || (isSet(work.image) && work.image.startsWith("/") ? sitePath(work.image) : "");
   const card = image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(isSet(work.imageAlt) ? work.imageAlt : "")}" loading="lazy" decoding="async">` : `<div class="work-image-placeholder" aria-hidden="true">Project image</div>`;
   const action = normalizeUrl(work.url);
   return `<section class="service-page-section optional-work-section" id="selected-work"><div class="container"><p class="section-index"><span>10</span> Selected work</p><div class="service-page-heading"><h2>Work, when it is ready to share.</h2><p>Only approved, real projects belong here.</p></div><article class="work-placeholder">${card}<div><p class="section-index">${escapeHtml(category)}</p><h3>${escapeHtml(title)}</h3><p>${escapeHtml(description)}</p>${action ? `<a class="text-link" href="${escapeHtml(action)}">View project ↗</a>` : ""}</div></article></div></section>`;
@@ -107,7 +138,7 @@ function optionalTeamSection() {
   const person = siteConfig.teamPlaceholder || {};
   const name = isSet(person.name) ? person.name : "Name to be added";
   const role = isSet(person.role) ? person.role : "Role to be added";
-  const photo = isSet(person.photo) && person.photo.startsWith("/") ? person.photo : "";
+  const photo = isSet(person.photo) && person.photo.startsWith("/") ? sitePath(person.photo) : "";
   const visual = photo ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(isSet(person.photoAlt) ? person.photoAlt : "")}" loading="lazy" decoding="async">` : `<div class="team-photo-placeholder" aria-hidden="true">Portrait</div>`;
   return `<section class="service-page-section optional-team-section"><div class="container"><p class="section-index"><span>11</span> The people behind the work</p><div class="team-placeholder">${visual}<div><h2>${escapeHtml(name)}</h2><p>${escapeHtml(role)}</p></div></div></div></section>`;
 }
@@ -126,15 +157,16 @@ function renderHome(homeTemplate, header, footer, script) {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "ZEC",
-    url: `${SITE_URL}/`,
-    logo: `${SITE_URL}/logo.png`,
+    url: absoluteSiteUrl("/"),
+    logo: absoluteSiteUrl("/logo.png"),
     description
   };
   const formUrlLiteral = "https://docs.google.com/forms/d/e/1FAIpQLScEimmQcJ5gNqr6mEWS4R6MxZFv5MR0CuxHeQQpt6AZggRN8A/viewform?usp=header";
   homeTemplate = homeTemplate.replaceAll(formUrlLiteral, escapeHtml(formUrl));
   return fill(homeTemplate, {
-    ...pageHead({ title: "ZEC — Digital Products Built With Intent", description, canonical: `${SITE_URL}/`, jsonLdContent: jsonLd(organization) }),
+    ...pageHead({ title: "ZEC — Digital Products Built With Intent", description, canonical: absoluteSiteUrl("/"), jsonLdContent: jsonLd(organization) }),
     OG_TYPE: "website",
+    BASE_PATH: escapeHtml(BASE_PATH),
     HEADER: header,
     FOOTER: footer,
     SCRIPT: script,
@@ -151,10 +183,10 @@ function renderFaqs(faqs) {
 }
 
 function renderService(service, template, header, footer, script) {
-  const canonical = `${SITE_URL}/services/${service.slug}`;
+  const canonical = absoluteSiteUrl(`/services/${service.slug}`);
   const title = `ZEC — ${service.name} | Digital Products Built With Intent`;
   const description = service.summary;
-  const organization = { "@type": "Organization", name: "ZEC", url: `${SITE_URL}/` };
+  const organization = { "@type": "Organization", name: "ZEC", url: absoluteSiteUrl("/") };
   const schemas = [
     { "@context": "https://schema.org", "@type": "Service", name: service.name, serviceType: service.name, description: service.intro, url: canonical, provider: organization },
     { "@context": "https://schema.org", "@type": "FAQPage", mainEntity: service.faqs.map((faq) => ({ "@type": "Question", name: faq.question, acceptedAnswer: { "@type": "Answer", text: faq.answer } })) }
@@ -162,13 +194,14 @@ function renderService(service, template, header, footer, script) {
   const related = service.related.map((slug) => {
     const item = serviceBySlug.get(slug);
     if (!item) throw new Error(`${service.name} references unknown related service ${slug}.`);
-    return `<a class="service-entry" href="/services/${item.slug}"><span class="service-no">${item.number}</span><span class="service-name">${escapeHtml(item.name)}</span><span class="service-detail">${escapeHtml(item.summary)}</span><span class="service-arrow" aria-hidden="true">↗</span></a>`;
+    return `<a class="service-entry" href="${sitePath(`/services/${item.slug}`)}"><span class="service-no">${item.number}</span><span class="service-name">${escapeHtml(item.name)}</span><span class="service-detail">${escapeHtml(item.summary)}</span><span class="service-arrow" aria-hidden="true">↗</span></a>`;
   }).join("\n");
   const price = isSet(service.priceFrom) ? `Typically starts from ${escapeHtml(service.priceFrom)}.` : "Typically starts from a scoped estimate; the amount follows the agreed deliverables and integrations.";
   const duration = isSet(service.durationRange) ? escapeHtml(service.durationRange) : "Set after the workflow, integrations and review schedule are scoped.";
   const values = {
     ...pageHead({ title, description, canonical, jsonLdContent: schemas }),
     OG_TYPE: "website",
+    BASE_PATH: escapeHtml(BASE_PATH),
     HEADER: header,
     FOOTER: footer,
     SCRIPT: script,
@@ -196,17 +229,18 @@ function renderService(service, template, header, footer, script) {
 function renderHub(template, header, footer, script) {
   const title = "ZEC Services — Websites, Digital Products and Systems";
   const description = "Explore ZEC services across websites, web applications, digital platforms, e-commerce, SaaS MVPs, custom systems and workflow automation.";
-  const canonical = `${SITE_URL}/services`;
+  const canonical = absoluteSiteUrl("/services");
   const collection = {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: title,
     url: canonical,
-    mainEntity: { "@type": "ItemList", itemListElement: services.map((service, index) => ({ "@type": "ListItem", position: index + 1, url: `${SITE_URL}/services/${service.slug}`, name: service.name })) }
+    mainEntity: { "@type": "ItemList", itemListElement: services.map((service, index) => ({ "@type": "ListItem", position: index + 1, url: absoluteSiteUrl(`/services/${service.slug}`), name: service.name })) }
   };
   return fill(template, {
     ...pageHead({ title, description, canonical, jsonLdContent: jsonLd(collection) }),
     OG_TYPE: "website",
+    BASE_PATH: escapeHtml(BASE_PATH),
     HEADER: header,
     FOOTER: footer,
     SCRIPT: script,
@@ -217,9 +251,10 @@ function renderHub(template, header, footer, script) {
 }
 
 function write(relativePath, content) {
-  const target = path.join(repoRoot, relativePath);
-  fs.mkdirSync(path.dirname(target), { recursive: true });
-  fs.writeFileSync(target, content, "utf8");
+  const targetPath = path.resolve(outputDir, relativePath);
+  if (targetPath !== outputDir && !targetPath.startsWith(`${outputDir}${path.sep}`)) throw new Error(`Output path escaped dist: ${relativePath}`);
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
+  fs.writeFileSync(targetPath, content, "utf8");
 }
 
 const headerTemplate = fs.readFileSync(path.join(templateDir, "partials", "header.html"), "utf8");
@@ -231,14 +266,29 @@ const hubTemplate = fs.readFileSync(path.join(templateDir, "services-index.html"
 const header = renderHeader(headerTemplate);
 const footer = renderFooter(footerTemplate);
 
-write("index.html", renderHome(homeTemplate, header, footer, scriptTemplate));
-write("services/index.html", renderHub(hubTemplate, header, footer, scriptTemplate));
-for (const service of services) write(`services/${service.slug}/index.html`, renderService(service, serviceTemplate, header, footer, scriptTemplate));
+fs.rmSync(outputDir, { recursive: true, force: true });
+fs.mkdirSync(outputDir, { recursive: true });
+fs.cpSync(path.join(repoRoot, "assets"), path.join(outputDir, "assets"), { recursive: true });
+fs.copyFileSync(path.join(repoRoot, "logo.png"), path.join(outputDir, "logo.png"));
+fs.copyFileSync(path.join(repoRoot, "favicon.png"), path.join(outputDir, "favicon.png"));
 
-const sitemapUrls = [`${SITE_URL}/`, `${SITE_URL}/services`, ...services.map((service) => `${SITE_URL}/services/${service.slug}`)];
+write(pageOutputPath("/"), renderHome(homeTemplate, header, footer, scriptTemplate));
+write(pageOutputPath("/services"), renderHub(hubTemplate, header, footer, scriptTemplate));
+for (const service of services) write(pageOutputPath(`/services/${service.slug}`), renderService(service, serviceTemplate, header, footer, scriptTemplate));
+write("404.html", fill(fs.readFileSync(path.join(templateDir, "404.html"), "utf8"), {
+  BASE_PATH: escapeHtml(BASE_PATH),
+  HOME_URL: sitePath("/"),
+  SERVICES_URL: sitePath("/services"),
+  HEADER: header,
+  FOOTER: footer,
+  SCRIPT: scriptTemplate,
+  FORM_URL: escapeHtml(formUrl)
+}));
+
+const sitemapRoutes = ["/", "/services", ...services.map((service) => `/services/${service.slug}`)];
+const sitemapUrls = sitemapRoutes.map(absoluteSiteUrl);
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapUrls.map((url) => `  <url><loc>${escapeHtml(url)}</loc></url>`).join("\n")}\n</urlset>\n`);
-write("robots.txt", `User-agent: *\nAllow: /\nSitemap: ${SITE_URL}/sitemap.xml\n`);
-write("README.md", `# ZEC\n\n**Built with intent.**\n\nZEC designs websites, digital products, platforms and custom systems around real business workflows.\n\n## Build\n\nRun \`node scripts/build.mjs\` from any directory. The dependency-free build reads \`data/services.json\`, \`data/site-config.json\` and the shared templates, then writes the static pages and sitemap.\n\nSet \`SITE_URL\` to override the canonical site origin for a build.\n\n## Pages\n\n- \`/\` — ZEC homepage\n- \`/services\` — service directory\n- Seven service pages under \`/services/\`\n\n## Configuration\n\nEdit \`data/services.json\` for service copy, \`{{PRICE_FROM}}\` and \`{{DURATION_RANGE}}\` values. Edit \`data/site-config.json\` for the site URL, project form, WhatsApp number, email, optional booking link, and the disabled work and team sections.\n\nContact links render when real values are supplied. The work and team sections stay hidden until their flags are enabled.\n`);
+write("robots.txt", `User-agent: *\nAllow: ${BASE_PATH || "/"}/\nSitemap: ${SITE_URL}/sitemap.xml\n`);
+if (target === "github-pages") write(".nojekyll", "");
 
-console.log(`Built homepage, service directory and ${services.length} service pages for ${SITE_URL}.`);
-
+console.log(`Built ${target} output at ${outputDir}: homepage, service directory and ${services.length} service pages (BASE_PATH=${BASE_PATH || "(empty)"}, SITE_URL=${SITE_URL}).`);
