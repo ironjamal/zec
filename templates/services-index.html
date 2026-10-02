@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <title>{{TITLE}}</title>
+  <meta name="description" content="{{DESCRIPTION}}">
+  <link rel="canonical" href="{{CANONICAL}}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{TITLE}}">
+  <meta property="og:description" content="{{DESCRIPTION}}">
+  <meta property="og:url" content="{{CANONICAL}}">
+  <meta property="og:image" content="{{OG_IMAGE}}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{TITLE}}">
+  <meta name="twitter:description" content="{{DESCRIPTION}}">
+  <meta name="twitter:image" content="{{OG_IMAGE}}">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/design.css">
+  {{JSONLD}}
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="reading-progress" aria-hidden="true"><span id="reading-progress-bar"></span></div>
+  {{HEADER}}
+  <main id="main" class="services-hub-page">
+    <section class="hero service-hero" id="top" aria-labelledby="hero-title">
+      <div class="hero-media" aria-hidden="true"><picture><source media="(max-width: 640px)" srcset="/assets/zec-hero-architecture.webp"><img src="/assets/zec-architecture-break.webp" alt="" width="1800" height="990" fetchpriority="high" decoding="async"></picture></div>
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="hero-frame">
+        <div class="hero-topline"><span class="hero-kicker">Independent digital studio</span><span class="hero-coordinates">Strategy&nbsp; / &nbsp;Design&nbsp; / &nbsp;Development</span></div>
+        <div class="hero-bottom">
+          <div class="hero-heading-wrap"><p class="hero-eyebrow">ZEC / Services / 00</p><h1 id="hero-title"><span>Services</span><span>for real work.</span></h1></div>
+          <div class="hero-aside"><p>Websites, products and systems shaped around what people need to do.</p><a class="hero-cta" href="{{FORM_URL}}" target="_blank" rel="noopener noreferrer">Start a project <span aria-hidden="true">↗</span></a></div>
+        </div>
+        <a class="scroll-cue" href="#all-services"><span>Explore services</span><i aria-hidden="true">↓</i></a>
+      </div>
+    </section>
+
+    <section class="services-section services-hub-section" id="all-services" aria-labelledby="services-title">
+      <div class="container services-shell">
+        <div class="services-intro"><p class="section-index reveal"><span>01</span> Services</p><h2 id="services-title" class="reveal">What ZEC<br>can build.</h2><p class="services-lead reveal">Start with the product, the workflow or the experience that needs attention.</p><span class="services-side-note" aria-hidden="true">EXPLORE EACH SERVICE&nbsp; ↘</span></div>
+        <div class="service-directory service-directory--hub">{{SERVICE_DIRECTORY}}</div>
+      </div>
+    </section>
+
+    <section class="contact-section" id="contact" data-header-tone="dark" aria-labelledby="contact-title">
+      <div class="contact-frame">
+        <p class="contact-index reveal">ZEC&nbsp; / &nbsp;02 — Start a project</p>
+        <h2 id="contact-title" class="reveal">Have a project<br><em>in mind?</em></h2>
+        <div class="contact-bottom"><p class="reveal">Tell us what you are building.<br>We will begin with the problem to solve.</p><a class="contact-cta reveal" href="{{FORM_URL}}" target="_blank" rel="noopener noreferrer">Start a project <span aria-hidden="true">↗</span></a></div>
+        {{CONTACT_LINKS}}
+      </div>
+    </section>
+  </main>
+  {{FOOTER}}
+  {{SCRIPT}}
+</body>
+</html>
+

@@ -1,0 +1,25 @@
+{
+  "siteUrl": "https://zeceg.vercel.app",
+  "projectFormUrl": "https://docs.google.com/forms/d/e/1FAIpQLScEimmQcJ5gNqr6mEWS4R6MxZFv5MR0CuxHeQQpt6AZggRN8A/viewform?usp=header",
+  "contact": {
+    "whatsappNumber": "{{WHATSAPP_NUMBER}}",
+    "email": "{{CONTACT_EMAIL}}",
+    "bookingUrl": "{{BOOKING_URL}}"
+  },
+  "showWork": false,
+  "workPlaceholder": {
+    "title": "{{PROJECT_TITLE}}",
+    "category": "{{PROJECT_CATEGORY}}",
+    "description": "{{PROJECT_DESCRIPTION}}",
+    "image": "{{PROJECT_IMAGE}}",
+    "url": "{{PROJECT_URL}}"
+  },
+  "showTeam": false,
+  "teamPlaceholder": {
+    "name": "{{TEAM_MEMBER_NAME}}",
+    "role": "{{TEAM_MEMBER_ROLE}}",
+    "photo": "{{TEAM_MEMBER_PHOTO}}",
+    "photoAlt": "{{TEAM_MEMBER_PHOTO_ALT}}"
+  }
+}
+

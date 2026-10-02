@@ -1,0 +1,338 @@
+[
+  {
+    "number": "01",
+    "name": "Websites",
+    "slug": "websites",
+    "summary": "A focused site that explains the offer and makes the next step easy to find.",
+    "promise": "Give your offer a useful place to land.",
+    "intro": "A business website should help the right people understand what you do, see why it matters and take a useful next step.",
+    "heroLines": ["Websites", "with direction."],
+    "audience": [
+      "Your offer has changed, but the site still describes an earlier version of the business.",
+      "Visitors reach the site but cannot quickly find the right service or next step.",
+      "A launch, new market or new product needs a clear digital home.",
+      "Several pages, forms and content updates need one consistent structure."
+    ],
+    "deliverables": [
+      "Project brief and audience priorities",
+      "Page map and content structure",
+      "Key messages and calls to action",
+      "Responsive interface and visual system",
+      "Accessible, semantic frontend",
+      "Forms and agreed third-party integrations",
+      "Search metadata and launch checks"
+    ],
+    "process": [
+      { "name": "Discover", "description": "Review the offer, audience, existing content and the decisions the site should support.", "deliverable": "A concise project brief" },
+      { "name": "Define", "description": "Set page priorities, navigation, key messages and the path from entry to enquiry.", "deliverable": "A page map and content outline" },
+      { "name": "Design", "description": "Shape the page hierarchy, visual direction and responsive states before development.", "deliverable": "Reviewed page designs" },
+      { "name": "Build", "description": "Implement the pages, interactions, forms and agreed content tools.", "deliverable": "A working responsive site" },
+      { "name": "Test", "description": "Check content, keyboard use, mobile layouts, forms, metadata and image loading.", "deliverable": "A launch-ready review list" },
+      { "name": "Launch", "description": "Publish the approved site and hand over the files and operating notes.", "deliverable": "A live site and handover" }
+    ],
+    "useCases": [
+      "A service business needs to explain several offers without sending visitors through a long menu.",
+      "A new product needs a launch site with a clear route to enquiry or signup.",
+      "An established site needs a new structure that reflects current services and content."
+    ],
+    "capabilities": ["Content architecture", "Responsive interface", "Accessible frontend", "Forms and integrations", "Search foundations", "Analytics-ready structure"],
+    "priceFrom": "{{PRICE_FROM}}",
+    "durationRange": "{{DURATION_RANGE}}",
+    "faqs": [
+      { "question": "Can ZEC work with our current content system?", "answer": "Yes. The project can extend a suitable existing system or use a simpler publishing setup when that better fits the team and content." },
+      { "question": "Can an existing website be redesigned?", "answer": "Yes. The work can start with the current site, identify what should stay and replace the parts that no longer support the offer or user journey." },
+      { "question": "How long does a website take?", "answer": "Timing depends on page count, content readiness, integrations and review cycles. A project schedule is set after the scope is agreed." },
+      { "question": "What does a website project cost?", "answer": "Cost follows the agreed pages, functionality and content needs. ZEC provides a scoped estimate before work begins." }
+    ],
+    "related": ["e-commerce", "digital-platforms"]
+  },
+  {
+    "number": "02",
+    "name": "Web applications",
+    "slug": "web-applications",
+    "summary": "A browser-based product for workflows, accounts, data and repeat tasks.",
+    "promise": "Give complex work a better interface.",
+    "intro": "A web application brings a defined workflow into one place, with the right views, permissions and actions for each user.",
+    "heroLines": ["Web", "applications."],
+    "audience": [
+      "A recurring task depends on spreadsheets, email and manual handoffs.",
+      "Customers or staff need a secure way to view or update information.",
+      "A dashboard must make operational data easier to understand and act on.",
+      "A product concept needs a usable first release in the browser."
+    ],
+    "deliverables": [
+      "Workflow and user-role map",
+      "Application information architecture",
+      "Core user journeys and interface states",
+      "Responsive application UI",
+      "Frontend implementation and data views",
+      "Authentication and permissions planning",
+      "API and service integration points",
+      "Error, empty and loading states"
+    ],
+    "process": [
+      { "name": "Discover", "description": "Map the users, current workflow, data sources and points where work slows down.", "deliverable": "A workflow and user map" },
+      { "name": "Define", "description": "Choose the first workflows, roles, permissions and boundaries for the release.", "deliverable": "A scoped feature outline" },
+      { "name": "Design", "description": "Design navigation, screens, forms and system feedback for each important state.", "deliverable": "A clickable product flow" },
+      { "name": "Build", "description": "Implement the interface and connect it to the agreed data and service layer.", "deliverable": "A functional application" },
+      { "name": "Test", "description": "Exercise user roles, data states, keyboard paths, device sizes and failure cases.", "deliverable": "A reviewed application" },
+      { "name": "Launch", "description": "Release the agreed scope, document the key flows and set out the next decisions.", "deliverable": "A release and handover" }
+    ],
+    "useCases": [
+      "A team needs one dashboard for tasks that currently move between separate spreadsheets.",
+      "Customers need a portal to check status, submit information or manage an account.",
+      "A service operation needs role-specific screens around an existing data source."
+    ],
+    "capabilities": ["Workflow mapping", "Role-based interfaces", "Authentication planning", "API integration", "Data views", "Accessible interaction states"],
+    "priceFrom": "{{PRICE_FROM}}",
+    "durationRange": "{{DURATION_RANGE}}",
+    "faqs": [
+      { "question": "Can ZEC design a dashboard or customer portal?", "answer": "Yes. The scope can include dashboards, account areas, internal tools and customer-facing portals around a defined workflow." },
+      { "question": "Can a web app connect to systems we already use?", "answer": "Potentially. The available API, permissions and data quality are reviewed before the integration approach is agreed." },
+      { "question": "How are user roles handled?", "answer": "Roles and access rules are defined early, then reflected in the interface and implementation requirements." },
+      { "question": "How long does an application take?", "answer": "The schedule depends on the number of workflows, data sources, roles and review needs. Timing is confirmed after scoping." }
+    ],
+    "related": ["custom-systems", "saas-mvps"]
+  },
+  {
+    "number": "03",
+    "name": "Digital platforms",
+    "slug": "digital-platforms",
+    "summary": "A connected service for multiple audiences, roles or parts of an operation.",
+    "promise": "Connect people, services and information.",
+    "intro": "A digital platform coordinates a wider service: different users, connected workflows and information that needs to move between them.",
+    "heroLines": ["Digital", "platforms."],
+    "audience": [
+      "A service involves more than one audience, role or organization.",
+      "Information is spread across disconnected tools or service touchpoints.",
+      "A directory, marketplace or member service needs a consistent structure.",
+      "A platform needs to support a new workflow without losing sight of its users."
+    ],
+    "deliverables": [
+      "Audience and platform model",
+      "Role and permission map",
+      "Service blueprint and information architecture",
+      "Core journeys for each audience",
+      "Shared visual and interaction system",
+      "Responsive platform interface",
+      "Integration and data-flow plan",
+      "Release boundaries and operating notes"
+    ],
+    "process": [
+      { "name": "Discover", "description": "Understand the participants, service model, current tools and dependencies.", "deliverable": "A platform context map" },
+      { "name": "Define", "description": "Set the first audience groups, permissions, shared records and release boundary.", "deliverable": "A platform scope" },
+      { "name": "Design", "description": "Connect the journeys and create a consistent system for different roles.", "deliverable": "Platform flows and interface designs" },
+      { "name": "Build", "description": "Implement the agreed journeys and connect the services that need to share data.", "deliverable": "A connected platform release" },
+      { "name": "Test", "description": "Review each role, key data exchange, permission boundary and fallback state.", "deliverable": "A platform review" },
+      { "name": "Launch", "description": "Release the agreed service, hand over operating notes and prioritize the next phase.", "deliverable": "A release plan and handover" }
+    ],
+    "useCases": [
+      "A membership service needs distinct spaces for members and administrators.",
+      "A directory needs to connect listings, search, enquiries and ownership updates.",
+      "A partner service needs a shared view of requests moving between organizations."
+    ],
+    "capabilities": ["Multi-role journeys", "Service blueprinting", "Permission planning", "Information architecture", "API integrations", "Phased releases"],
+    "priceFrom": "{{PRICE_FROM}}",
+    "durationRange": "{{DURATION_RANGE}}",
+    "faqs": [
+      { "question": "How is a platform different from a web application?", "answer": "A platform often connects several audiences or services. The structure is shaped around those relationships, shared data and permissions." },
+      { "question": "Can a platform be delivered in phases?", "answer": "Yes. The first release can focus on the most useful connected workflows, with later phases guided by use and operational needs." },
+      { "question": "Can existing systems be integrated?", "answer": "The options depend on the systems and their APIs. ZEC maps the integration requirements before committing to a technical approach." },
+      { "question": "What affects platform scope?", "answer": "Audience roles, data ownership, integrations, permissions and operational requirements all shape the scope." }
+    ],
+    "related": ["web-applications", "custom-systems"]
+  },
+  {
+    "number": "04",
+    "name": "E-commerce",
+    "slug": "e-commerce",
+    "summary": "An online store that helps people discover, compare and purchase products.",
+    "promise": "Make the path from product to purchase work.",
+    "intro": "An online store should make the product range easy to understand and the purchase path reliable on the devices people use.",
+    "heroLines": ["E-commerce.", "From browse to buy."],
+    "audience": [
+      "Products are difficult to discover or compare in the current store.",
+      "The checkout, product information or mobile shopping flow creates friction.",
+      "A new product range needs a considered online storefront.",
+      "Catalogues, inventory or order handoffs need a more connected experience."
+    ],
+    "deliverables": [
+      "Product and shopper journey map",
+      "Store information architecture",
+      "Product listing and detail page designs",
+      "Cart and checkout interaction design",
+      "Responsive storefront implementation",
+      "Payment and fulfilment integration plan",
+      "Product content and search metadata structure",
+      "Mobile and checkout review"
+    ],
+    "process": [
+      { "name": "Discover", "description": "Review the catalogue, shopper questions, fulfilment model and current purchase path.", "deliverable": "A store and shopper brief" },
+      { "name": "Define", "description": "Set catalogue structure, product attributes, checkout needs and platform boundaries.", "deliverable": "A store structure and scope" },
+      { "name": "Design", "description": "Shape browsing, product comparison, cart and checkout for desktop and mobile.", "deliverable": "Store flows and screen designs" },
+      { "name": "Build", "description": "Implement the storefront and connect the agreed catalogue, payment and fulfilment services.", "deliverable": "A working store" },
+      { "name": "Test", "description": "Review product data, checkout states, mobile use, confirmation messages and integration paths.", "deliverable": "A tested purchase flow" },
+      { "name": "Launch", "description": "Prepare the catalogue, publish the store and hand over order and content guidance.", "deliverable": "A live store and handover" }
+    ],
+    "useCases": [
+      "A product range needs useful filters, comparison and clear product details.",
+      "A small catalogue needs a streamlined store and familiar checkout.",
+      "An existing store needs a more consistent mobile purchase journey."
+    ],
+    "capabilities": ["Product information design", "Catalogue structure", "Responsive storefront", "Checkout UX", "Payment integration planning", "Order-flow review"],
+    "priceFrom": "{{PRICE_FROM}}",
+    "durationRange": "{{DURATION_RANGE}}",
+    "faqs": [
+      { "question": "Can ZEC improve an existing online store?", "answer": "Yes. The work can focus on product discovery, store structure, mobile use or specific steps in the purchase path." },
+      { "question": "Which store platform should we use?", "answer": "The choice depends on catalogue needs, operations, integrations and who will manage the store. It is part of the definition work." },
+      { "question": "Can payment and fulfilment tools be connected?", "answer": "Integration options depend on the chosen platform and service APIs. They are checked before the build scope is fixed." },
+      { "question": "How long does an e-commerce project take?", "answer": "The schedule depends on catalogue size, content readiness, integrations and review cycles. A timeline is agreed after scoping." }
+    ],
+    "related": ["websites", "digital-platforms"]
+  },
+  {
+    "number": "05",
+    "name": "SaaS MVPs",
+    "slug": "saas-mvps",
+    "summary": "A focused first release for testing one product workflow with real users.",
+    "promise": "Build the smallest useful product release.",
+    "intro": "An MVP should focus on the product question that matters most, then make that core workflow usable enough to learn from.",
+    "heroLines": ["SaaS MVPs.", "Start with the core."],
+    "audience": [
+      "A product idea has more features than the first release can support.",
+      "A team needs a working prototype to evaluate a defined workflow.",
+      "A product concept needs a foundation for iterative development.",
+      "Stakeholders need to agree what belongs in the first version."
+    ],
+    "deliverables": [
+      "Product hypothesis and audience definition",
+      "MVP scope and release boundary",
+      "Core workflow and navigation map",
+      "Prototype and interface system",
+      "First-release frontend and key integrations",
+      "Account and onboarding flow planning",
+      "Feedback and measurement plan",
+      "Next-step product backlog"
+    ],
+    "process": [
+      { "name": "Discover", "description": "Understand the product idea, intended user and the assumption the first release should examine.", "deliverable": "A product hypothesis" },
+      { "name": "Define", "description": "Separate the core workflow from later features and set a practical release boundary.", "deliverable": "An MVP feature outline" },
+      { "name": "Design", "description": "Prototype the key journey and resolve the interface decisions before implementation.", "deliverable": "A reviewed product prototype" },
+      { "name": "Build", "description": "Implement the agreed first workflow, account states and essential integrations.", "deliverable": "A usable first release" },
+      { "name": "Test", "description": "Review the core journey with realistic data and capture issues that block learning.", "deliverable": "A release review and feedback plan" },
+      { "name": "Launch", "description": "Release to the intended audience and organize the next product decisions.", "deliverable": "A first release and prioritized backlog" }
+    ],
+    "useCases": [
+      "A software idea needs one end-to-end workflow before a wider feature set is considered.",
+      "A service business wants to test a self-service product alongside its existing offer.",
+      "A team needs a prototype and scoped release to align product and development work."
+    ],
+    "capabilities": ["Product definition", "MVP scope", "Core workflow design", "Prototype testing", "Account journeys", "Iteration planning"],
+    "priceFrom": "{{PRICE_FROM}}",
+    "durationRange": "{{DURATION_RANGE}}",
+    "faqs": [
+      { "question": "What makes a product an MVP?", "answer": "It is the smallest release that supports a meaningful core workflow and the learning objective agreed during discovery." },
+      { "question": "Does an MVP include production-ready code?", "answer": "The build approach is agreed for the intended release. The work avoids adding unnecessary features while keeping the next steps visible." },
+      { "question": "Can ZEC help define what to leave out?", "answer": "Yes. Prioritization and release boundaries are part of the definition stage." },
+      { "question": "What happens after the first release?", "answer": "The team reviews use and feedback, then chooses the next improvements based on the product goals." }
+    ],
+    "related": ["web-applications", "digital-platforms"]
+  },
+  {
+    "number": "06",
+    "name": "Custom systems",
+    "slug": "custom-systems",
+    "summary": "A purpose-built business tool shaped around the operation it supports.",
+    "promise": "Fit the software to the way the work runs.",
+    "intro": "When standard tools leave gaps between people and processes, a custom system can bring the relevant work into a more coherent flow.",
+    "heroLines": ["Custom", "systems."],
+    "audience": [
+      "A team repeats the same administrative steps across several tools.",
+      "Existing software does not match the way the operation is organized.",
+      "Requests, approvals or records move through unclear handoffs.",
+      "Several tools need to share information without adding more manual work."
+    ],
+    "deliverables": [
+      "Current-state process map",
+      "Requirements and system boundaries",
+      "Role, record and permission model",
+      "Workflow and interface prototypes",
+      "Custom tool interface and implementation plan",
+      "Integration and data migration considerations",
+      "Error handling and operational feedback states",
+      "Documentation and handover notes"
+    ],
+    "process": [
+      { "name": "Discover", "description": "Observe the workflow, handoffs, tools and exceptions that shape the operation.", "deliverable": "A current-state process map" },
+      { "name": "Define", "description": "Set the system boundary, user roles, key records and what remains in existing tools.", "deliverable": "Requirements and system scope" },
+      { "name": "Design", "description": "Prototype the operational screens and feedback for normal and exception paths.", "deliverable": "A workflow prototype" },
+      { "name": "Build", "description": "Implement the agreed tool and connect the approved data sources and services.", "deliverable": "A working system release" },
+      { "name": "Test", "description": "Review permissions, edge cases, data handling and the steps people use each day.", "deliverable": "A system review and fixes" },
+      { "name": "Launch", "description": "Release the agreed workflows and hand over operating notes to the people using them.", "deliverable": "A release and handover" }
+    ],
+    "useCases": [
+      "A service operation needs one place to track requests from intake to completion.",
+      "A team needs a structured approval flow with clear ownership at each step.",
+      "A business needs a small tool that connects existing records with daily work."
+    ],
+    "capabilities": ["Process mapping", "Role and permission design", "Operational dashboards", "API integrations", "Data migration planning", "Exception-state design"],
+    "priceFrom": "{{PRICE_FROM}}",
+    "durationRange": "{{DURATION_RANGE}}",
+    "faqs": [
+      { "question": "When does a business need a custom system?", "answer": "It may fit when the workflow is specific, standard tools leave important gaps and the process is stable enough to define." },
+      { "question": "Can a custom system work with our existing software?", "answer": "Potentially. Existing APIs, data ownership and access rules are reviewed before integration work is proposed." },
+      { "question": "Can a system be built in stages?", "answer": "Yes. A first release can focus on one high-value workflow, with other parts added when they are ready to be defined." },
+      { "question": "How is the project scoped?", "answer": "Scope starts with the process, users, data and exceptions. ZEC then proposes an agreed release boundary and estimate." }
+    ],
+    "related": ["web-applications", "digital-platforms"]
+  },
+  {
+    "number": "07",
+    "name": "AI & workflow automation",
+    "slug": "ai-automation",
+    "summary": "Connected workflows that reduce repetitive handoffs and keep people in control.",
+    "promise": "Automate the repeat work. Keep judgment with people.",
+    "intro": "Automation can move information between tools, while AI can assist with bounded tasks such as classification or drafting. Each flow needs clear checks and a human fallback.",
+    "heroLines": ["AI", "workflow", "automation."],
+    "audience": [
+      "Staff copy the same information between forms, inboxes and business tools.",
+      "Routine intake, routing or status updates consume time every week.",
+      "A process needs an AI-assisted step with review before action is taken.",
+      "Existing integrations need monitoring, clear failure handling or better ownership."
+    ],
+    "deliverables": [
+      "Workflow and exception map",
+      "Automation opportunity and risk outline",
+      "Tool and API integration plan",
+      "Workflow orchestration, including n8n-compatible patterns where suitable",
+      "Bounded AI prompts and structured outputs when appropriate",
+      "Human approval and fallback steps",
+      "Logging, notifications and failure handling",
+      "Workflow documentation and handover"
+    ],
+    "process": [
+      { "name": "Discover", "description": "Map the repeat work, inputs, tools, people and cases that need judgment.", "deliverable": "A current workflow map" },
+      { "name": "Define", "description": "Choose a bounded first flow and set privacy, review, fallback and success criteria.", "deliverable": "An automation scope and guardrails" },
+      { "name": "Design", "description": "Specify triggers, routing, human checks, data fields and failure notifications.", "deliverable": "A reviewed workflow design" },
+      { "name": "Build", "description": "Connect the approved tools and implement deterministic steps plus any bounded AI assistance.", "deliverable": "A working automation flow" },
+      { "name": "Test", "description": "Exercise expected, missing, malformed and failure inputs before the flow is relied on.", "deliverable": "Test cases and a monitored pilot" },
+      { "name": "Launch", "description": "Release the agreed flow, document ownership and set the review process.", "deliverable": "A controlled release and handover" }
+    ],
+    "useCases": [
+      "New enquiries can be categorized and routed, with a person reviewing uncertain cases.",
+      "A team can synchronize approved records between a form and its operations system.",
+      "Incoming documents can be summarized into a draft that a staff member checks before use."
+    ],
+    "capabilities": ["Workflow mapping", "n8n-compatible orchestration", "API integrations", "AI-assisted classification", "Human approval paths", "Logging and failure handling"],
+    "priceFrom": "{{PRICE_FROM}}",
+    "durationRange": "{{DURATION_RANGE}}",
+    "faqs": [
+      { "question": "What can workflow automation handle?", "answer": "It can move data, trigger routine actions and route work between connected tools. Each flow is scoped around its inputs, permissions and exceptions." },
+      { "question": "Where does AI fit in an automated workflow?", "answer": "AI can assist with bounded tasks such as classification or drafting. Output should be checked before important or irreversible actions." },
+      { "question": "Does every automation need AI?", "answer": "No. A predictable process is often better handled with clear rules and integrations. AI is included only where it fits the task." },
+      { "question": "Can ZEC work with n8n or our existing tools?", "answer": "The workflow can use n8n-style orchestration or another suitable tool. Existing APIs, data access and operating requirements shape the choice." }
+    ],
+    "related": ["custom-systems", "web-applications"]
+  }
+]
+

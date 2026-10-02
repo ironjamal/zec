@@ -2,15 +2,23 @@
 
 **Built with intent.**
 
-ZEC designs and builds websites, digital products, platforms, and custom digital systems around real business needs.
+ZEC designs websites, digital products, platforms and custom systems around real business workflows.
 
-## Preview
+## Build
 
-Open `index.html` in a browser or serve this folder with any static web server.
+Run `node scripts/build.mjs` from any directory. The dependency-free build reads `data/services.json`, `data/site-config.json` and the shared templates, then writes the static pages and sitemap.
 
-## Files
+Set `SITE_URL` to override the canonical site origin for a build.
 
-- `index.html` — page content and semantic structure
-- `assets/design.css` — visual system and responsive styles
-- `assets/` — architectural imagery and image credits
-- `favicon.png`, `olo.png`, `logo.png` — brand assets
+## Pages
+
+- `/` — ZEC homepage
+- `/services` — service directory
+- Seven service pages under `/services/`
+
+## Configuration
+
+Edit `data/services.json` for service copy, `{{PRICE_FROM}}` and `{{DURATION_RANGE}}` values. Edit `data/site-config.json` for the site URL, project form, WhatsApp number, email, optional booking link, and the disabled work and team sections.
+
+Contact links render when real values are supplied. The work and team sections stay hidden until their flags are enabled.
+

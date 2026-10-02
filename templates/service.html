@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <title>{{TITLE}}</title>
+  <meta name="description" content="{{DESCRIPTION}}">
+  <link rel="canonical" href="{{CANONICAL}}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{TITLE}}">
+  <meta property="og:description" content="{{DESCRIPTION}}">
+  <meta property="og:url" content="{{CANONICAL}}">
+  <meta property="og:image" content="{{OG_IMAGE}}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{TITLE}}">
+  <meta name="twitter:description" content="{{DESCRIPTION}}">
+  <meta name="twitter:image" content="{{OG_IMAGE}}">
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/design.css">
+  {{JSONLD}}
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="reading-progress" aria-hidden="true"><span id="reading-progress-bar"></span></div>
+  {{HEADER}}
+  <main id="main" class="service-page">
+    <section class="hero service-hero" id="top" aria-labelledby="hero-title">
+      <div class="hero-media" aria-hidden="true"><picture><source media="(max-width: 640px)" srcset="/assets/zec-hero-architecture.webp"><img src="/assets/zec-architecture-break.webp" alt="" width="1800" height="990" fetchpriority="high" decoding="async"></picture></div>
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="hero-frame">
+        <div class="hero-topline"><span class="hero-kicker">Independent digital studio</span><span class="hero-coordinates">Strategy&nbsp; / &nbsp;Design&nbsp; / &nbsp;Development</span></div>
+        <div class="hero-bottom">
+          <div class="hero-heading-wrap">
+            <p class="hero-eyebrow">ZEC / Services / {{NUMBER}}</p>
+            <h1 id="hero-title">{{HERO_LINES}}</h1>
+            <p class="service-hero-promise">{{PROMISE}}</p>
+          </div>
+          <div class="hero-aside"><p>{{INTRO}}</p><a class="hero-cta" href="{{FORM_URL}}" target="_blank" rel="noopener noreferrer">Start a project <span aria-hidden="true">↗</span></a></div>
+        </div>
+        <a class="scroll-cue" href="#who"><span>Explore the service</span><i aria-hidden="true">↓</i></a>
+      </div>
+    </section>
+
+    <section class="service-page-section" id="who" aria-labelledby="who-title">
+      <div class="container">
+        <p class="section-index reveal"><span>01</span> Who it’s for</p>
+        <div class="service-page-heading"><h2 id="who-title">For teams at this point.</h2><p>{{INTRO}}</p></div>
+        <ol class="service-situations">{{AUDIENCE}}</ol>
+      </div>
+    </section>
+
+    <section class="service-page-section" aria-labelledby="deliverables-title">
+      <div class="container">
+        <p class="section-index reveal"><span>02</span> What you get</p>
+        <div class="service-page-heading"><h2 id="deliverables-title">A useful set of parts.</h2><p>The scope is shaped around the release, the people using it and the systems it has to work with.</p></div>
+        <ol class="service-deliverables">{{DELIVERABLES}}</ol>
+      </div>
+    </section>
+
+    <section class="service-page-section service-method-section" id="method" aria-labelledby="method-title">
+      <div class="container">
+        <p class="section-index reveal"><span>03</span> How we build it</p>
+        <div class="service-page-heading"><h2 id="method-title">Six stages. One working outcome.</h2><p>{{METHOD_INTRO}}</p></div>
+        <p class="service-duration"><span>Typical duration</span><strong>{{DURATION}}</strong></p>
+        <ol class="service-stage-list">{{PROCESS}}</ol>
+      </div>
+    </section>
+
+    <section class="service-page-section" aria-labelledby="use-cases-title">
+      <div class="container">
+        <p class="section-index reveal"><span>04</span> Typical use cases</p>
+        <div class="service-page-heading"><h2 id="use-cases-title">Example situations.</h2><p>These are generic scenarios, not client case studies or promised results.</p></div>
+        <ol class="service-use-cases">{{USE_CASES}}</ol>
+      </div>
+    </section>
+
+    <section class="service-page-section service-capabilities-section" aria-labelledby="capabilities-title">
+      <div class="container">
+        <p class="section-index reveal"><span>05</span> Tech &amp; capabilities</p>
+        <div class="service-page-heading"><h2 id="capabilities-title">Tools follow the work.</h2><p>The implementation choices are confirmed against the project’s existing systems, requirements and operating needs.</p></div>
+        <ul class="service-tags">{{CAPABILITIES}}</ul>
+      </div>
+    </section>
+
+    <section class="service-page-section service-pricing-section" aria-labelledby="pricing-title">
+      <div class="container service-pricing-layout">
+        <p class="section-index reveal"><span>06</span> Pricing guidance</p>
+        <div><h2 id="pricing-title">A scope before a number.</h2><p class="service-price-guidance">{{PRICE_GUIDANCE}}</p><p class="service-price-note">The estimate follows the agreed deliverables, integrations and review needs. No work begins before scope is approved.</p></div>
+      </div>
+    </section>
+
+    <section class="service-page-section" id="faq" aria-labelledby="service-faq-title">
+      <div class="container faq-layout">
+        <div class="faq-heading"><p class="section-index reveal"><span>07</span> Questions</p><h2 id="service-faq-title" class="reveal">About {{SERVICE_NAME}}.</h2><p class="faq-intro reveal">Specifics are confirmed before a project starts.</p></div>
+        <div class="faq-list">{{FAQS}}</div>
+      </div>
+    </section>
+
+    <section class="service-page-section service-related-section" aria-labelledby="related-title">
+      <div class="container">
+        <p class="section-index reveal"><span>08</span> Related services</p>
+        <div class="service-page-heading"><h2 id="related-title">Nearby disciplines.</h2><p>Some projects combine more than one of these services.</p></div>
+        <div class="service-related-list">{{RELATED_SERVICES}}</div>
+      </div>
+    </section>
+
+    <section class="contact-section" id="contact" data-header-tone="dark" aria-labelledby="contact-title">
+      <div class="contact-frame">
+        <p class="contact-index reveal">ZEC&nbsp; / &nbsp;09 — Start a project</p>
+        <h2 id="contact-title" class="reveal">Have a project<br><em>in mind?</em></h2>
+        <div class="contact-bottom"><p class="reveal">Tell us what you are building.<br>We will begin with the problem to solve.</p><a class="contact-cta reveal" href="{{FORM_URL}}" target="_blank" rel="noopener noreferrer">Start a project <span aria-hidden="true">↗</span></a></div>
+        {{CONTACT_LINKS}}
+      </div>
+    </section>
+  </main>
+  {{FOOTER}}
+  {{SCRIPT}}
+</body>
+</html>
+

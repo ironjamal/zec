@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+Sitemap: https://zeceg.vercel.app/sitemap.xml
+
