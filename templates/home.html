@@ -28,9 +28,7 @@
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <div class="reading-progress" aria-hidden="true"><span id="reading-progress-bar"></span></div>
-
 {{HEADER}}
-
   <main id="main">
     <section class="hero" id="top" aria-labelledby="hero-title">
       <div class="hero-media" aria-hidden="true">
@@ -56,77 +54,60 @@
             <p class="hero-expectations">Reply within <strong>{{REPLY_TIME}}</strong> · No work starts until scope is approved.</p>
           </div>
         </div>
-        <a class="scroll-cue" href="#statement"><span>Scroll to explore</span><i aria-hidden="true">↓</i></a>
+        <a class="scroll-cue" href="#who-for"><span>Scroll to explore</span><i aria-hidden="true">↓</i></a>
         <span class="hero-photo-credit">Architecture / photo by <a href="https://unsplash.com/@mau_imagen" target="_blank" rel="noopener noreferrer">Mauricio Aramburu</a></span>
       </div>
     </section>
 
-    <section class="statement-section" id="statement" aria-labelledby="statement-title">
-      <div class="container statement-wrap">
-        <p class="section-index reveal"><span>01</span> A clear purpose</p>
-        <h2 class="statement-title" id="statement-title"><span class="reveal-line"><span>Digital products</span></span><span class="reveal-line"><span>shaped for</span></span><span class="reveal-line statement-italic"><span>the work behind them.</span></span></h2>
-        <div class="statement-bottom">
-          <span class="statement-mark" aria-hidden="true">ZEC<span>—</span>01</span>
-          <p>Strategy, design and development begin together. Each decision comes back to the people using the product and the work it should support.</p>
+    <section class="who-section" id="who-for" aria-labelledby="who-title">
+      <div class="container who-layout">
+        <p class="section-index"><span>01</span> Who ZEC is for</p>
+        <div class="who-copy">
+          <h2 id="who-title">A partner for the work behind the business.</h2>
+          <p class="who-ideal">{{IDEAL_CLIENT}}</p>
+          <div class="who-not-for"><span>Not for</span><ul>{{NOT_FOR_ITEMS}}</ul></div>
         </div>
       </div>
     </section>
 
-    <section class="services-section" id="services" aria-labelledby="services-title">
-      <div class="container services-shell">
-        <div class="services-intro">
-          <p class="section-index reveal"><span>02</span> Disciplines</p>
-          <h2 id="services-title" class="reveal">What we<br>build.</h2>
-          <p class="services-lead reveal">Websites, online stores and software, planned around the people who use them and the work they support.</p>
-          <span class="services-side-note" aria-hidden="true">SELECT A DISCIPLINE&nbsp; ↘</span>
+    <section class="situations-section" id="situations" aria-labelledby="situations-title">
+      <div class="container">
+        <div class="situations-heading">
+          <p class="section-index"><span>02</span> Situations</p>
+          <h2 id="situations-title">Start with what needs to change.</h2>
         </div>
-        <div class="service-directory">
-          {{SERVICE_DIRECTORY}}
-        </div>
+        <div class="situation-grid">{{SITUATIONS}}</div>
       </div>
     </section>
 
-    <section class="solutions-section" id="solutions" data-header-tone="dark" aria-labelledby="solutions-title">
-      <div class="container solutions-heading">
-        <p class="section-index reveal"><span>03</span> Choose the right starting point</p>
-        <div class="solutions-heading-main">
-          <h2 id="solutions-title" class="reveal">Let the need<br><em>shape the build.</em></h2>
-          <p class="solutions-intro reveal">The format follows the work at hand — from explaining an offer to connecting an operation.</p>
+    <section class="proof-section" id="selected-work" aria-labelledby="work-title">
+      <div class="container">
+        <div class="proof-heading">
+          <p class="section-index"><span>03</span> Samples</p>
+          <h2 id="work-title">Selected work and proof.</h2>
+          <p>These clearly labelled sample slots are placeholders, not client projects.</p>
         </div>
+        <div class="work-samples">{{WORK_ITEMS}}</div>
+        {{FOUNDER_STRIP}}
       </div>
-      <div class="container solutions-list" aria-label="Choose a digital solution by need">
-        <a class="solution-row reveal" href="{{BASE_PATH}}/services/websites" aria-label="Explore website and landing page services">
-          <span class="solution-number">01</span>
-          <div class="solution-copy"><h3>Make the offer clear.</h3><p>Help people understand what you do and what to do next.</p></div>
-          <div class="solution-fit"><span>Start with</span><strong>Website / Landing page</strong></div>
-          <span class="solution-arrow" aria-hidden="true">↗</span>
-        </a>
-        <a class="solution-row reveal" href="{{BASE_PATH}}/services/web-applications" aria-label="Explore web application and dashboard services">
-          <span class="solution-number">02</span>
-          <div class="solution-copy"><h3>Make a task easier.</h3><p>Bring repeat work and slow handoffs into a tool built around the process.</p></div>
-          <div class="solution-fit"><span>Start with</span><strong>Web application / Dashboard</strong></div>
-          <span class="solution-arrow" aria-hidden="true">↗</span>
-        </a>
-        <a class="solution-row reveal" href="{{BASE_PATH}}/services/e-commerce" aria-label="Explore e-commerce services">
-          <span class="solution-number">03</span>
-          <div class="solution-copy"><h3>Sell with less friction.</h3><p>Make it easier to discover, compare and buy your products.</p></div>
-          <div class="solution-fit"><span>Start with</span><strong>E-commerce / Digital storefront</strong></div>
-          <span class="solution-arrow" aria-hidden="true">↗</span>
-        </a>
-        <a class="solution-row reveal" href="{{BASE_PATH}}/services/custom-systems" aria-label="Explore custom systems services">
-          <span class="solution-number">04</span>
-          <div class="solution-copy"><h3>Connect the operation.</h3><p>Bring people, tools and services into one coherent system.</p></div>
-          <div class="solution-fit"><span>Start with</span><strong>Platform / Custom system</strong></div>
-          <span class="solution-arrow" aria-hidden="true">↗</span>
-        </a>
-      </div>
-      <div class="container solutions-foot reveal"><span>NOT SURE WHERE TO START?</span><a href="{{BASE_PATH}}/start">Tell us what needs to work <span aria-hidden="true">→</span></a></div>
     </section>
 
-    <section class="approach-section" id="approach" aria-labelledby="approach-title">
+    <section class="offers-section" id="offers" aria-labelledby="offers-title">
+      <div class="container">
+        <div class="offers-heading">
+          <p class="section-index"><span>04</span> Offers</p>
+          <h2 id="offers-title">Three ways to start.</h2>
+          <p>The service pages below each offer explain the work in more detail.</p>
+          <p class="confirm-note">E-commerce placement: <strong>{{ECOMMERCE_OFFER_PLACEMENT}}</strong></p>
+        </div>
+        <div class="offer-grid">{{HOME_OFFERS}}</div>
+      </div>
+    </section>
+
+    <section class="approach-section homepage-process-section" id="process" aria-labelledby="process-title">
       <div class="container approach-header">
-        <p class="section-index reveal"><span>04</span> Method</p>
-        <div><h2 id="approach-title" class="reveal">Make the right<br><em>thing, well.</em></h2><p class="approach-lead reveal">A connected process keeps the work useful from the first question to launch.</p></div>
+        <p class="section-index"><span>05</span> Process and expectations</p>
+        <div><h2 id="process-title" class="reveal">Make the right<br><em>thing, well.</em></h2><p class="approach-lead reveal">A connected six-stage process keeps the work useful from the first question to launch.</p></div>
       </div>
       <div class="container process-layout">
         <aside class="process-focus" aria-hidden="true">
@@ -145,91 +126,52 @@
           <li class="process-step" data-title="Launch" data-copy="Deliver the product and agree on what should happen next."><span>06</span><h3>Launch</h3><p>Deliver and move forward.</p></li>
         </ol>
       </div>
+      <div class="container process-next"><p>No work starts until scope is approved.</p><a href="#sample-brief">See a sample brief <span aria-hidden="true">↓</span></a></div>
     </section>
 
-    <section class="manifesto-section" id="thinking" data-header-tone="dark" aria-labelledby="manifesto-title">
-      <div class="container manifesto-layout">
-        <p class="section-index reveal"><span>05</span> What we believe</p>
-        <div class="manifesto-main">
-          <h2 id="manifesto-title" class="reveal">Design is<br>how it <em>works.</em></h2>
-          <p class="manifesto-intro reveal">A digital experience should help people understand where they are and what they can do next.</p>
-          <ol class="manifesto-list">
-            <li class="reveal"><span>01</span>Communicate clearly.</li>
-            <li class="reveal"><span>02</span>Build trust.</li>
-            <li class="reveal"><span>03</span>Guide people.</li>
-            <li class="reveal"><span>04</span>Reduce friction.</li>
-            <li class="reveal"><span>05</span>Support the business.</li>
-          </ol>
-        </div>
-      </div>
-    </section>
-
-    <section class="capabilities-section" id="capabilities" aria-labelledby="capabilities-title">
-      <div class="container">
-        <div class="capabilities-heading">
-          <p class="section-index reveal"><span>06</span> Capabilities / Connected practice</p>
-          <h2 id="capabilities-title" class="reveal">From first question<br>to working product.</h2>
-        </div>
-        <div class="capability-index-list">
-          <article class="capability-row reveal"><span class="capability-number">01</span><h3>Strategy</h3><p>Digital strategy <i>·</i> Product definition <i>·</i> Information architecture</p><span class="capability-mark" aria-hidden="true">↘</span></article>
-          <article class="capability-row reveal"><span class="capability-number">02</span><h3>Design</h3><p>UX / UI <i>·</i> Visual systems <i>·</i> Responsive design <i>·</i> Conversion design</p><span class="capability-mark" aria-hidden="true">↘</span></article>
-          <article class="capability-row reveal"><span class="capability-number">03</span><h3>Development</h3><p>Frontend <i>·</i> Web applications <i>·</i> Dashboards <i>·</i> Platforms</p><span class="capability-mark" aria-hidden="true">↘</span></article>
-          <article class="capability-row reveal"><span class="capability-number">04</span><h3>Products</h3><p>E-commerce <i>·</i> SaaS MVPs <i>·</i> Custom systems <i>·</i> Business tools</p><span class="capability-mark" aria-hidden="true">↘</span></article>
-        </div>
-      </div>
-    </section>
-
-    <section class="visual-break" data-header-tone="dark" aria-label="Architectural visual interlude">
-      <div class="break-media reveal-mask">
-        <img src="{{BASE_PATH}}/assets/zec-hero-architecture.webp" alt="A monochrome view looking up through the geometric concrete structure of a modern building." width="1200" height="1800" loading="lazy" decoding="async">
-      </div>
-      <div class="break-overlay" aria-hidden="true"></div>
-      <div class="break-caption"><span>07 / Structure&nbsp; — &nbsp;Photo by <a href="https://unsplash.com/photos/grayscale-photo-of-concrete-building-5LED2xbiKvk" target="_blank" rel="noopener noreferrer">Osman Rana</a></span><strong>Structure<br>in focus.</strong><span>Business&nbsp; / &nbsp;Design&nbsp; / &nbsp;Technology</span></div>
-    </section>
-
-    {{OPTIONAL_WORK}}
-    {{OPTIONAL_TEAM}}
-
-    <section class="about-section" id="about" aria-labelledby="about-title">
+    <section class="about-section home-about-section" id="about" aria-labelledby="about-title">
       <div class="container about-layout">
-        <p class="section-index reveal"><span>08</span> About ZEC</p>
+        <p class="section-index"><span>06</span> About and people</p>
         <div class="about-content">
-          <h2 id="about-title" class="reveal">Business.<br>Design.<br>Technology.</h2>
-          <div class="about-side reveal"><span class="about-equation" aria-hidden="true">B <i>×</i> D <i>×</i> T</span><p>ZEC connects the way a business works with the experiences people use — from the first idea to the final interface and beyond.</p></div>
+          <div>
+            <h2 id="about-title">Business.<br>Design.<br>Technology.</h2>
+            <p class="about-intro">ZEC is an independent digital studio. The details below identify who carries out the work; placeholders stay visible until confirmed.</p>
+          </div>
+          <div class="about-side about-people">
+            <p><span>Founder</span><strong>{{FOUNDER_NAME}}</strong></p>
+            <p><span>Role</span><strong>{{FOUNDER_ROLE}}</strong></p>
+            <p><span>Delivery team</span><strong>{{TEAM_STRUCTURE}}</strong></p>
+            <p><span>Location / timezone</span><strong>{{LOCATION_TIMEZONE}}</strong></p>
+            {{EMAIL_CTA}}
+          </div>
         </div>
       </div>
     </section>
 
-    <section class="faq-section" id="faq" aria-labelledby="faq-title">
+    <section class="faq-section home-faq-section" id="faq" aria-labelledby="faq-title">
       <div class="container faq-layout">
-        <div class="faq-heading"><p class="section-index reveal"><span>09</span> Questions</p><h2 id="faq-title" class="reveal">Before we<br>begin.</h2><p class="faq-intro reveal">A few useful details about working with ZEC.</p></div>
-        <div class="faq-list">
-          <details class="faq-item"><summary><span>What does ZEC build?</span><i aria-hidden="true"></i></summary><div class="faq-answer"><p>Websites, landing pages, e-commerce, web applications, dashboards, platforms, SaaS MVPs and custom business systems.</p></div></details>
-          <details class="faq-item"><summary><span>What type of businesses can ZEC work with?</span><i aria-hidden="true"></i></summary><div class="faq-answer"><p>ZEC works with businesses that need a website, a digital product or a custom system. The first conversation helps clarify whether the work is a good fit.</p></div></details>
-          <details class="faq-item"><summary><span>How does a project begin?</span><i aria-hidden="true"></i></summary><div class="faq-answer"><p>Start with a conversation about what you are trying to solve. We clarify the needs, agree on scope and outline next steps before work begins.</p></div></details>
-          <details class="faq-item"><summary><span>How long does a website take?</span><i aria-hidden="true"></i></summary><div class="faq-answer"><p>Timing depends on scope, content and review cycles. Once the scope is clear, ZEC will provide a project schedule before starting.</p></div></details>
-          <details class="faq-item"><summary><span>Can ZEC redesign an existing website?</span><i aria-hidden="true"></i></summary><div class="faq-answer"><p>Yes. The work can begin with what is already there: what serves people well, what causes friction and what needs to change.</p></div></details>
-          <details class="faq-item"><summary><span>Can ZEC build web applications or custom systems?</span><i aria-hidden="true"></i></summary><div class="faq-answer"><p>Yes. ZEC can design and develop web applications, dashboards, platforms and business tools around the workflow they need to support.</p></div></details>
-          <details class="faq-item"><summary><span>How much does a project cost?</span><i aria-hidden="true"></i></summary><div class="faq-answer"><p>Cost depends on the size and requirements of the project. After understanding the scope, ZEC will send a clear proposal before you commit.</p></div></details>
-          <details class="faq-item"><summary><span>Does ZEC work internationally?</span><i aria-hidden="true"></i></summary><div class="faq-answer"><p>Yes. Projects can be run remotely with businesses in different locations.</p></div></details>
-          <details class="faq-item"><summary><span>What happens after launch?</span><i aria-hidden="true"></i></summary><div class="faq-answer"><p>Maintenance or future improvements can be planned as part of the project or discussed as follow-up work.</p></div></details>
-        </div>
+        <div class="faq-heading"><p class="section-index"><span>07</span> Questions</p><h2 id="faq-title">Before we<br>begin.</h2><p class="faq-intro">Useful details about fit, scope and what comes next.</p></div>
+        <div class="faq-list">{{HOME_FAQS}}</div>
       </div>
     </section>
 
-    <section class="contact-section" id="contact" data-header-tone="dark" aria-labelledby="contact-title">
+    <section class="contact-section home-contact-section" id="contact" data-header-tone="dark" aria-labelledby="contact-title">
       <div class="contact-frame">
-        <p class="contact-index reveal">ZEC&nbsp; / &nbsp;10 — Start a project</p>
-        <h2 id="contact-title" class="reveal">Have a project<br><em>in mind?</em></h2>
-        <div class="contact-bottom"><p class="reveal">Tell us what needs to work.<br>We will begin with the problem to solve.</p><a class="contact-cta reveal" href="{{BASE_PATH}}/start">Tell us what needs to work <span aria-hidden="true">→</span></a></div>
-        {{CONTACT_LINKS}}
+        <p class="contact-index">ZEC&nbsp; / &nbsp;08 — Start a project</p>
+        <h2 id="contact-title">Have a project<br><em>in mind?</em></h2>
+        <div class="final-contact-copy">
+          <p>Reply within <strong>{{REPLY_TIME}}</strong>. No work starts until scope is approved.</p>
+          <ol class="final-next-steps">
+            <li>We reply with questions or a fit check.</li>
+            <li>If useful, we can arrange an optional short intro call.</li>
+            <li>If we’re a fit, we send a scoped proposal with price and timeline.</li>
+          </ol>
+          <div class="final-contact-actions"><a class="contact-cta" href="{{BASE_PATH}}/start">Tell us what needs to work <span aria-hidden="true">→</span></a>{{FINAL_EMAIL}}</div>
+        </div>
       </div>
     </section>
   </main>
-
 {{FOOTER}}
-
   {{SCRIPT}}
-
 </body>
 </html>

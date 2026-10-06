@@ -91,6 +91,34 @@ for (const page of pages) {
   if (ogImage !== expectedImage || twitterImage !== expectedImage) errors.push(`Open Graph/Twitter image does not match target SITE_URL: ${page.route}`);
   if ((html.match(/<h1\b/gi) || []).length !== 1) errors.push(`Expected exactly one H1: ${page.route}`);
   if (/\{\{[^}]*\}\}|\bundefined\b|\bnull\b/i.test(html)) errors.push(`Raw placeholder/undefined/null in ${page.route}`);
+  const primaryNav = html.match(/<nav class="primary-nav"[^>]*>([\s\S]*?)<\/nav>/i)?.[1] || "";
+  const footerNav = html.match(/<nav class="footer-nav"[^>]*>([\s\S]*?)<\/nav>/i)?.[1] || "";
+  for (const label of ["Services", "Process", "About"]) {
+    if (!primaryNav.includes(label)) errors.push(`Primary navigation is missing ${label} on ${page.route}.`);
+    if (!footerNav.includes(label)) errors.push(`Footer navigation is missing ${label} on ${page.route}.`);
+  }
+  if (!primaryNav.includes("Samples") && !primaryNav.includes("Work")) errors.push(`Primary navigation is missing its Work/Samples link on ${page.route}.`);
+  if (!footerNav.includes("Samples") && !footerNav.includes("Work")) errors.push(`Footer navigation is missing its Work/Samples link on ${page.route}.`);
+  const footerOffers = html.match(/<nav class="footer-offers"[^>]*>([\s\S]*?)<\/nav>/i)?.[1] || "";
+  if ((footerOffers.match(/<a\b/g) || []).length !== 3) errors.push(`Footer must link to all three offers on ${page.route}.`);
+  if (!/class="footer-location"/.test(html)) errors.push(`Footer is missing the location/timezone placeholder on ${page.route}.`);
+  if (page.route === "/") {
+    const homeMain = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] || "";
+    const homeSections = [...homeMain.matchAll(/<section\b[^>]*\bid="([^"]+)"/gi)].map((match) => match[1]);
+    const expectedSections = ["top", "who-for", "situations", "selected-work", "offers", "process", "about", "faq", "contact"];
+    if (JSON.stringify(homeSections) !== JSON.stringify(expectedSections)) errors.push(`Homepage sections do not match the required nine-section order: ${homeSections.join(", ")}`);
+    if ((homeMain.match(/class="situation-card"/g) || []).length !== 4) errors.push("Homepage must render four situation cards.");
+    if ((homeMain.match(/class="offer-card"/g) || []).length !== 3) errors.push("Homepage must render exactly three offer cards.");
+    if ((homeMain.match(/class="faq-item"/g) || []).length !== 7) errors.push("Homepage must render seven FAQs.");
+    if ((homeMain.match(/class="work-sample"/g) || []).length < 2) errors.push("Homepage must render at least two labelled work or sample items.");
+    if (!html.includes(`${basePrefix}/assets/zec-architecture-break.webp`) || !html.includes(`${basePrefix}/assets/zec-hero-architecture.webp`)) errors.push("Homepage must keep the existing desktop and mobile hero photos.");
+    if (/class="(?:visual-break|manifesto-section|capabilities-section|solutions-section)"/.test(homeMain)) errors.push("Homepage still contains a section removed by the nine-section redesign.");
+    if (!primaryNav.includes("Samples")) errors.push("Homepage navigation should say Samples while its work items are placeholders.");
+  }
+  if (page.route === "/services") {
+    if ((html.match(/class="service-offer-group"/g) || []).length !== 3) errors.push("Services page must group depth pages under three offers.");
+    if ((html.match(/class="service-depth-link"/g) || []).length !== services.length) errors.push("Services page must list every depth page exactly once.");
+  }
   if (page.route === "/start") {
     if (!/<form\b[^>]*id="start-form"/i.test(html)) errors.push("Start page is missing its project enquiry form.");
     if (!/company_website_check/.test(html)) errors.push("Start page is missing its spam honeypot field.");

@@ -9,6 +9,7 @@ ZEC designs websites, digital products, platforms and custom systems around real
 - `npm run build` — builds the Vercel site to `dist/` with an empty `BASE_PATH` and `https://zeceg.vercel.app` as `SITE_URL`.
 - `npm run build:github-pages` — builds the GitHub Pages project site to `dist/` with `BASE_PATH=/zec` and `SITE_URL=https://ironjamal.github.io/zec`.
 - `npm run check` and `npm run check:github-pages` — validate page metadata, schemas, sitemap, local links, base paths and placeholders for the corresponding target.
+- `npm run lint` — dependency-free syntax checks for JavaScript, inline scripts, JSON and CSS block structure.
 - `npm test` — run the built-in Node.js tests for the contact endpoint.
 
 The source is dependency-free. Edit `data/services.json`, `data/site-config.json` and the shared templates, then run the appropriate target build. Environment variables `SITE_URL` and `BASE_PATH` can override the selected target for local checks.
@@ -27,7 +28,11 @@ Both targets publish folder `index.html` routes, so `/services` and its service 
 
 ## Configuration
 
+The homepage has nine sections. Its four situations and three offers are grouped in `data/site-config.json` under `homepage`; the seven existing service URLs remain available as depth pages grouped below the offers on `/services`. The Work navigation label reads “Samples” until at least two non-placeholder proof items are configured.
+
 Public content and all business details still awaiting confirmation live in `data/site-config.json` under `confirm`. Replace each visible `[CONFIRM: ...]` value before launch. This includes the reply-time promise, budget ranges, price floor and currency, timelines, fit notes, founder/team details, location/timezone, work samples and the e-commerce offer placement. WhatsApp is disabled by default. The homepage currently shows two clearly labelled sample placeholders, not client work.
+
+`npm run lint` uses Node.js built-ins so the project stays dependency-free. It checks JavaScript and inline-script syntax, parses the JSON data files, and checks CSS comments, strings and block braces. It is a syntax and structure check, not a stylistic ESLint rule set.
 
 The `/start` page posts to the Vercel Function at `/api/start`. The function validates the submission server-side, rejects a filled honeypot, and does not accept submissions until `confirm.REPLY_TIME` has been replaced with a confirmed value.
 

@@ -11,6 +11,53 @@
       "basePath": "/zec"
     }
   },
+  "homepage": {
+    "idealClient": "For an owner, founder or marketing or operations lead at a small-to-mid business or early-stage startup without an in-house design and development team, looking for one partner.",
+    "situations": [
+      { "text": "The site still describes an earlier version of the business.", "offerId": "websites-stores" },
+      { "text": "I want to sell online with less friction.", "offerId": "websites-stores" },
+      { "text": "My team repeats the same work by hand.", "offerId": "web-apps-tools" },
+      { "text": "I'm launching a product and need a first version.", "offerId": "product-builds" }
+    ],
+    "offers": [
+      {
+        "id": "websites-stores",
+        "title": "Websites & stores",
+        "description": "Business websites, landing pages, redesigns, e-commerce and UI/UX.",
+        "fit": "For when the site no longer explains the business or needs to sell.",
+        "cta": "Start with a website",
+        "projectType": "websites-stores",
+        "serviceSlugs": ["websites", "e-commerce"]
+      },
+      {
+        "id": "web-apps-tools",
+        "title": "Web apps & internal tools",
+        "description": "Web applications, dashboards, custom systems, AI and workflow automation.",
+        "fit": "For when repeat work and handoffs slow the team.",
+        "cta": "Start with a web app",
+        "projectType": "web-apps-tools",
+        "serviceSlugs": ["web-applications", "digital-platforms", "custom-systems", "ai-automation"]
+      },
+      {
+        "id": "product-builds",
+        "title": "Product builds",
+        "description": "SaaS MVPs and platforms.",
+        "fit": "For when you're launching something new and need a first version to test.",
+        "cta": "Start with a product",
+        "projectType": "product-builds",
+        "serviceSlugs": ["saas-mvps"]
+      }
+    ],
+    "faqs": [
+      { "question": "What is the project minimum?", "answer": "Projects start from {PRICE_FLOOR}. The final price depends on the agreed scope; you receive a proposal before deciding whether to proceed." },
+      { "question": "How long does a project take?", "answer": "Typical timing: {TIMELINE_RANGES}. The schedule for your project is confirmed after its scope and review points are agreed." },
+      { "question": "Who is ZEC a fit for?", "answer": "{IDEAL_CLIENT} ZEC is not for {NOT_FOR}." },
+      { "question": "What should I bring to the first conversation?", "answer": "Share the business context, the problem you want to solve and any existing material you can. We can identify what else is needed before defining the scope." },
+      { "question": "What does handover include?", "answer": "Handover and any follow-on support should be agreed in the written scope before work begins." },
+      { "question": "Can we work remotely?", "answer": "ZEC's location and timezone are {LOCATION_TIMEZONE}. Working hours and meeting times can be agreed while the project is scoped." },
+      { "question": "What happens after launch?", "answer": "Agree in the scope what is included at launch and whether separate follow-on work is needed." }
+    ]
+  },
   "contact": {
     "whatsappEnabled": false,
     "whatsappNumber": "[CONFIRM: WHATSAPP_NUMBER — disabled until confirmed]",
@@ -41,24 +88,22 @@
       "photo": "[CONFIRM: FOUNDER_PHOTO]",
       "credential": "[CONFIRM: FOUNDER_CREDENTIAL]"
     },
-    "TEAM": [
-      {
-        "name": "[CONFIRM: TEAM_MEMBER_NAME]",
-        "role": "[CONFIRM: TEAM_MEMBER_ROLE]",
-        "photo": "[CONFIRM: TEAM_MEMBER_PHOTO]"
-      }
-    ],
+    "TEAM_STRUCTURE": "[CONFIRM: TEAM_STRUCTURE — confirm who carries out project delivery]",
     "LOCATION_TIMEZONE": "[CONFIRM: LOCATION_AND_TIMEZONE]",
     "WORK_ITEMS": [
       {
+        "id": "sample-brief",
         "label": "Sample deliverable — placeholder",
         "title": "Project brief preview to be added",
-        "description": "This marked sample slot is not a client project. Replace it with a reviewed brief excerpt."
+        "description": "This marked sample slot is not a client project. Replace it with a reviewed brief excerpt.",
+        "isPlaceholder": true
       },
       {
+        "id": "sample-page-map",
         "label": "Sample deliverable — placeholder",
         "title": "Page map preview to be added",
-        "description": "This marked sample slot is not a client project. Replace it with a reviewed page map."
+        "description": "This marked sample slot is not a client project. Replace it with a reviewed page map.",
+        "isPlaceholder": true
       }
     ]
   },
@@ -79,26 +124,12 @@
     "web-apps": "web-app",
     "web-app": "web-app",
     "product": "saas",
-    "product-builds": "saas"
+    "product-builds": "saas",
+    "websites-stores": "website",
+    "web-apps-tools": "web-app"
   },
   "autoReplyTemplate": {
     "subject": "We received your note",
     "body": "Thanks for getting in touch with ZEC. Here is what happens next:\n\n1. We’ll reply within {REPLY_TIME} with any questions or a fit check.\n2. If useful, we can arrange an optional short intro call{BOOKING_LINK}.\n3. If we’re a fit, we’ll send a scoped proposal with price and timeline. No work starts until scope is approved.\n\nZEC"
-  },
-  "showWork": true,
-  "workPlaceholder": {
-    "title": "[CONFIRM: PROJECT_TITLE]",
-    "category": "[CONFIRM: PROJECT_CATEGORY]",
-    "description": "[CONFIRM: PROJECT_DESCRIPTION]",
-    "image": "[CONFIRM: PROJECT_IMAGE]",
-    "imageAlt": "[CONFIRM: PROJECT_IMAGE_ALT]",
-    "url": "[CONFIRM: PROJECT_URL]"
-  },
-  "showTeam": false,
-  "teamPlaceholder": {
-    "name": "[CONFIRM: TEAM_MEMBER_NAME]",
-    "role": "[CONFIRM: TEAM_MEMBER_ROLE]",
-    "photo": "[CONFIRM: TEAM_MEMBER_PHOTO]",
-    "photoAlt": "[CONFIRM: TEAM_MEMBER_PHOTO_ALT]"
   }
 }

@@ -6,6 +6,7 @@
     "build": "node scripts/build.mjs --target vercel",
     "build:vercel": "node scripts/build.mjs --target vercel",
     "build:github-pages": "node scripts/build.mjs --target github-pages",
+    "lint": "node scripts/lint.mjs",
     "check": "node scripts/check-site.mjs --target vercel",
     "check:vercel": "node scripts/check-site.mjs --target vercel",
     "test": "node --test",

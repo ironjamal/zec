@@ -31,6 +31,11 @@ for (const service of services) {
   if (!Array.isArray(service.faqs) || service.faqs.length < 4 || service.faqs.length > 5) throw new Error(`${service.name} must define four or five FAQs.`);
   if (!Array.isArray(service.related) || service.related.length !== 2 || service.related.some((slug) => !serviceBySlug.has(slug))) throw new Error(`${service.name} must reference two existing related services.`);
 }
+const homepageOffers = siteConfig.homepage?.offers || [];
+const groupedServiceSlugs = homepageOffers.flatMap((offer) => offer.serviceSlugs || []);
+if (homepageOffers.length !== 3) throw new Error("The homepage must define exactly three offers.");
+if (new Set(homepageOffers.map((offer) => offer.id)).size !== homepageOffers.length || homepageOffers.some((offer) => !/^[a-z0-9-]+$/.test(offer.id))) throw new Error("Offer IDs must be unique lowercase slugs.");
+if (groupedServiceSlugs.length !== services.length || new Set(groupedServiceSlugs).size !== services.length || services.some((service) => !groupedServiceSlugs.includes(service.slug))) throw new Error("The three offers must group every service page exactly once.");
 
 function escapeHtml(value = "") {
   return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
@@ -103,44 +108,103 @@ function publicEmailMarkup() {
   return `<span class="confirm-placeholder">Email to add: ${escapeHtml(email)}</span>`;
 }
 
-function renderHeader(headerTemplate) {
-  return fill(headerTemplate, { FORM_URL: escapeHtml(formUrl), BASE_PATH: escapeHtml(BASE_PATH) });
+function homeSectionUrl(id) {
+  return `${sitePath("/")}#${id}`;
 }
 
-function renderFooter(footerTemplate) {
-  const serviceLinks = services.map((service) => `<a href="${sitePath(`/services/${service.slug}`)}">${escapeHtml(service.name)}</a>`).join("");
-  const footerServices = `<div class="container footer-services"><span class="footer-services-label">Services</span><nav class="footer-service-links" aria-label="Service pages"><a href="${sitePath("/services")}">All services</a>${serviceLinks}</nav></div>`;
-  return fill(footerTemplate, {
+function workNavigationLabel() {
+  const items = siteConfig.confirm?.WORK_ITEMS || [];
+  const publishedProof = items.filter((item) => item.isPlaceholder !== true && isSet(item.label) && isSet(item.title));
+  return publishedProof.length >= 2 ? "Work" : "Samples";
+}
+
+function renderHeader(headerTemplate) {
+  return fill(headerTemplate, {
     FORM_URL: escapeHtml(formUrl),
     BASE_PATH: escapeHtml(BASE_PATH),
-    FOOTER_SERVICES: footerServices,
-    FOOTER_CONTACT_LINKS: contactLinks("footer-contact-links")
+    WORK_LABEL: escapeHtml(workNavigationLabel())
   });
 }
 
-function serviceDirectory() {
-  return services.map((service, index) => `<a class="service-entry${index === 0 ? " is-active" : ""}" href="${sitePath(`/services/${service.slug}`)}"><span class="service-no">${service.number}</span><span class="service-name">${escapeHtml(service.name)}</span><span class="service-detail">${escapeHtml(service.summary)}</span><span class="service-arrow" aria-hidden="true">↗</span></a>`).join("\n");
+function renderFooter(footerTemplate) {
+  const offers = homepageOffers.map((offer) => `<a href="${escapeHtml(homeSectionUrl(`offer-${offer.id}`))}">${escapeHtml(offer.title)}</a>`).join("");
+  const footerOffers = `<nav class="footer-offers" aria-label="Offers"><span>Offers</span>${offers}</nav>`;
+  return fill(footerTemplate, {
+    FORM_URL: escapeHtml(formUrl),
+    BASE_PATH: escapeHtml(BASE_PATH),
+    WORK_LABEL: escapeHtml(workNavigationLabel()),
+    FOOTER_OFFERS: footerOffers,
+    FOOTER_CONTACT_LINKS: contactLinks("footer-contact-links"),
+    FOOTER_LOCATION_TIMEZONE: escapeHtml(siteConfig.confirm.LOCATION_TIMEZONE)
+  });
 }
 
-function contactSection(className = "contact-links") {
-  return contactLinks(className);
+function serviceOfferGroups() {
+  return homepageOffers.map((offer) => {
+    const serviceLinks = offer.serviceSlugs.map((slug) => {
+      const service = serviceBySlug.get(slug);
+      if (!service) throw new Error(`Offer ${offer.title} references unknown service ${slug}.`);
+      return `<a class="service-depth-link" href="${sitePath(`/services/${service.slug}`)}"><span class="service-no">${service.number}</span><span><strong>${escapeHtml(service.name)}</strong><small>${escapeHtml(service.summary)}</small></span><span class="service-arrow" aria-hidden="true">→</span></a>`;
+    }).join("");
+    const placement = offer.id === "websites-stores" ? `<p class="service-placement-note">E-commerce placement: ${escapeHtml(siteConfig.confirm.ECOMMERCE_OFFER_PLACEMENT)}</p>` : "";
+    return `<section class="service-offer-group" aria-labelledby="service-offer-${escapeHtml(offer.id)}"><div><h3 id="service-offer-${escapeHtml(offer.id)}">${escapeHtml(offer.title)}</h3><p>${escapeHtml(offer.description)}</p>${placement}</div><div class="service-depth-links">${serviceLinks}</div></section>`;
+  }).join("\n");
 }
 
-function optionalWorkSection() {
-  if (!siteConfig.showWork) return "";
+function renderSituations() {
+  return siteConfig.homepage.situations.map((situation) => {
+    const offer = homepageOffers.find((item) => item.id === situation.offerId);
+    if (!offer) throw new Error(`Situation references unknown offer ${situation.offerId}.`);
+    return `<a class="situation-card" href="#offer-${escapeHtml(offer.id)}"><span class="situation-offer">${escapeHtml(offer.title)}</span><h3>${escapeHtml(situation.text)}</h3><span class="situation-link">Explore this offer <span aria-hidden="true">↓</span></span></a>`;
+  }).join("");
+}
+
+function renderOfferCards() {
+  return homepageOffers.map((offer) => {
+    const startUrl = `${formUrl}?type=${encodeURIComponent(offer.projectType)}`;
+    const servicesUrl = `${sitePath("/services")}#service-offer-${offer.id}`;
+    return `<article class="offer-card" id="offer-${escapeHtml(offer.id)}"><p class="offer-index">${String(homepageOffers.indexOf(offer) + 1).padStart(2, "0")}</p><h3>${escapeHtml(offer.title)}</h3><p>${escapeHtml(offer.description)}</p><p class="offer-fit">${escapeHtml(offer.fit)}</p><a class="offer-services-link" href="${escapeHtml(servicesUrl)}">Explore service pages</a><a class="offer-cta" href="${escapeHtml(startUrl)}">${escapeHtml(offer.cta)} <span aria-hidden="true">→</span></a></article>`;
+  }).join("");
+}
+
+function renderHomeWork() {
   const items = siteConfig.confirm?.WORK_ITEMS || [];
-  const cards = items.map((item) => `<article class="work-sample"><p class="work-sample-label">${escapeHtml(item.label)}</p><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p></article>`).join("");
-  return `<section class="service-page-section optional-work-section" id="selected-work" aria-labelledby="selected-work-title"><div class="container"><p class="section-index"><span>10</span> Samples</p><div class="service-page-heading"><h2 id="selected-work-title">A look at the work.</h2><p>These marked placeholders are sample deliverables, not client projects.</p></div><div class="work-samples">${cards}</div></div></section>`;
+  return items.map((item) => {
+    const id = /^[a-z0-9-]+$/.test(item.id || "") ? ` id="${escapeHtml(item.id)}"` : "";
+    return `<article class="work-sample"${id}><p class="work-sample-label">${escapeHtml(item.label)}</p><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p></article>`;
+  }).join("");
 }
 
-function optionalTeamSection() {
-  if (!siteConfig.showTeam) return "";
-  const person = siteConfig.teamPlaceholder || {};
-  const name = isSet(person.name) ? person.name : "Name to be added";
-  const role = isSet(person.role) ? person.role : "Role to be added";
-  const photo = isSet(person.photo) && person.photo.startsWith("/") ? sitePath(person.photo) : "";
-  const visual = photo ? `<img src="${escapeHtml(photo)}" alt="${escapeHtml(isSet(person.photoAlt) ? person.photoAlt : "")}" loading="lazy" decoding="async">` : `<div class="team-photo-placeholder" aria-hidden="true">Portrait</div>`;
-  return `<section class="service-page-section optional-team-section"><div class="container"><p class="section-index"><span>11</span> The people behind the work</p><div class="team-placeholder">${visual}<div><h2>${escapeHtml(name)}</h2><p>${escapeHtml(role)}</p></div></div></div></section>`;
+function founderPortrait(person) {
+  const imagePath = isSet(person.photo) && /^\/assets\/[a-z0-9/_-]+\.(?:webp|png|jpe?g)$/i.test(person.photo) ? sitePath(person.photo) : "";
+  if (imagePath) return `<img src="${escapeHtml(imagePath)}" alt="Photo of ${escapeHtml(person.name)}" loading="lazy" decoding="async">`;
+  return `<div class="founder-portrait-placeholder"><span>Photo to add</span><small>${escapeHtml(person.photo || "[CONFIRM: FOUNDER_PHOTO]")}</small></div>`;
+}
+
+function renderFounderStrip() {
+  const founder = siteConfig.confirm.FOUNDER;
+  return `<div class="founder-strip"><div class="founder-strip-portrait">${founderPortrait(founder)}</div><div class="founder-strip-name"><span>Studio founder</span><h3>${escapeHtml(founder.name)}</h3><p>${escapeHtml(founder.role)}</p></div><p class="founder-credential"><span>Credential</span>${escapeHtml(founder.credential)}</p></div>`;
+}
+
+function renderEmailCta() {
+  const email = siteConfig.contact?.email || "";
+  if (isSet(email) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return `<a class="about-email-cta" href="mailto:${escapeHtml(email)}">Email us <span aria-hidden="true">→</span></a>`;
+  return `<p class="about-email-placeholder">Email us: ${escapeHtml(email)} <small>Confirm before launch</small></p>`;
+}
+
+function renderHomeFaqs() {
+  const replacements = {
+    PRICE_FLOOR: siteConfig.confirm.PRICE_FLOOR,
+    TIMELINE_RANGES: siteConfig.confirm.TIMELINE_RANGES,
+    IDEAL_CLIENT: siteConfig.homepage.idealClient,
+    NOT_FOR: siteConfig.confirm.NOT_FOR.join(", "),
+    LOCATION_TIMEZONE: siteConfig.confirm.LOCATION_TIMEZONE
+  };
+  return siteConfig.homepage.faqs.map((faq) => {
+    let answer = faq.answer;
+    for (const [key, value] of Object.entries(replacements)) answer = answer.replaceAll(`{${key}}`, escapeHtml(value));
+    return `<details class="faq-item"><summary><span>${escapeHtml(faq.question)}</span><i aria-hidden="true"></i></summary><div class="faq-answer"><p>${answer}</p></div></details>`;
+  }).join("\n");
 }
 
 function listItems(items, className, renderItem) {
@@ -152,7 +216,7 @@ function pageHead({ title, description, canonical, jsonLdContent }) {
 }
 
 function renderHome(homeTemplate, header, footer, script) {
-  const description = "ZEC designs websites, web applications, e-commerce experiences, platforms and custom digital systems for businesses.";
+  const description = "ZEC designs and builds websites, online stores, web apps, internal tools and early product versions around the work a business needs to do.";
   const organization = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -170,10 +234,20 @@ function renderHome(homeTemplate, header, footer, script) {
     SCRIPT: script,
     FORM_URL: escapeHtml(formUrl),
     REPLY_TIME: escapeHtml(siteConfig.confirm.REPLY_TIME),
-    SERVICE_DIRECTORY: serviceDirectory(),
-    CONTACT_LINKS: contactSection(),
-    OPTIONAL_WORK: optionalWorkSection(),
-    OPTIONAL_TEAM: optionalTeamSection()
+    IDEAL_CLIENT: escapeHtml(siteConfig.homepage.idealClient),
+    NOT_FOR_ITEMS: siteConfig.confirm.NOT_FOR.map((item) => `<li${item.includes("[CONFIRM:") ? " class=\"is-confirm\"" : ""}>${escapeHtml(item)}</li>`).join(""),
+    SITUATIONS: renderSituations(),
+    WORK_ITEMS: renderHomeWork(),
+    FOUNDER_STRIP: renderFounderStrip(),
+    ECOMMERCE_OFFER_PLACEMENT: escapeHtml(siteConfig.confirm.ECOMMERCE_OFFER_PLACEMENT),
+    HOME_OFFERS: renderOfferCards(),
+    FOUNDER_NAME: escapeHtml(siteConfig.confirm.FOUNDER.name),
+    FOUNDER_ROLE: escapeHtml(siteConfig.confirm.FOUNDER.role),
+    TEAM_STRUCTURE: escapeHtml(siteConfig.confirm.TEAM_STRUCTURE),
+    LOCATION_TIMEZONE: escapeHtml(siteConfig.confirm.LOCATION_TIMEZONE),
+    EMAIL_CTA: renderEmailCta(),
+    HOME_FAQS: renderHomeFaqs(),
+    FINAL_EMAIL: publicEmailMarkup()
   });
 }
 
@@ -252,7 +326,7 @@ function renderService(service, template, header, footer, script) {
     CAPABILITIES: service.capabilities.map((tag) => `<li>${escapeHtml(tag)}</li>`).join(""),
     FAQS: renderFaqs(service.faqs),
     RELATED_SERVICES: related,
-    CONTACT_LINKS: contactSection()
+    CONTACT_LINKS: contactLinks()
   };
   return fill(template, values);
 }
@@ -276,8 +350,8 @@ function renderHub(template, header, footer, script) {
     FOOTER: footer,
     SCRIPT: script,
     FORM_URL: escapeHtml(formUrl),
-    SERVICE_DIRECTORY: serviceDirectory(),
-    CONTACT_LINKS: contactSection()
+    SERVICE_GROUPS: serviceOfferGroups(),
+    CONTACT_LINKS: contactLinks()
   });
 }
 
