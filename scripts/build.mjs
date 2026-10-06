@@ -15,7 +15,7 @@ const targetConfig = siteConfig.targets?.[target];
 if (!targetConfig) throw new Error(`Unknown build target: ${target}. Use vercel or github-pages.`);
 const SITE_URL = (process.env.SITE_URL || targetConfig.siteUrl || siteConfig.siteUrl).replace(/\/$/, "");
 const BASE_PATH = normalizeBasePath(process.env.BASE_PATH ?? targetConfig.basePath ?? siteConfig.basePath ?? "");
-const formUrl = siteConfig.projectFormUrl;
+const formUrl = sitePath("/start");
 const ogImage = `${SITE_URL}/assets/og-image.jpg`;
 
 if (!/^https?:\/\//i.test(SITE_URL)) throw new Error("SITE_URL must be an absolute http(s) URL.");
@@ -72,7 +72,7 @@ function fill(template, values) {
 }
 
 function isSet(value) {
-  return typeof value === "string" && value.trim() !== "" && !/\{\{[^}]+\}\}/.test(value);
+  return typeof value === "string" && value.trim() !== "" && !/\{\{[^}]+\}\}|\[CONFIRM:/i.test(value);
 }
 
 function normalizeUrl(value) {
@@ -90,12 +90,17 @@ function contactLinks(className = "contact-links") {
   const number = siteConfig.contact?.whatsappNumber || "";
   const digits = String(number).replace(/\D/g, "");
   const whatsappUrl = normalizeUrl(number) || (isSet(number) && digits.length >= 8 ? `https://wa.me/${digits}` : "");
-  if (whatsappUrl) links.push(`<a href="${escapeHtml(whatsappUrl)}" target="_blank" rel="noopener noreferrer">WhatsApp <span aria-hidden="true">↗</span></a>`);
+  if (siteConfig.contact?.whatsappEnabled && whatsappUrl) links.push(`<a href="${escapeHtml(whatsappUrl)}" target="_blank" rel="noopener noreferrer">WhatsApp <span aria-hidden="true">↗</span></a>`);
   const email = siteConfig.contact?.email || "";
-  if (isSet(email) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) links.push(`<a href="mailto:${escapeHtml(email)}">Email <span aria-hidden="true">↗</span></a>`);
-  const booking = normalizeUrl(siteConfig.contact?.bookingUrl || "");
-  if (booking) links.push(`<a href="${escapeHtml(booking)}" target="_blank" rel="noopener noreferrer">Book a conversation <span aria-hidden="true">↗</span></a>`);
-  return links.length ? `<nav class="${className}" aria-label="Direct contact">${links.join("")}</nav>` : "";
+  if (isSet(email) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) links.push(`<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>`);
+  else links.push(`<span class="email-confirmation">Email: ${escapeHtml(email)} <small>Confirm before launch</small></span>`);
+  return links.length ? `<div class="${className}">${links.join("")}</div>` : "";
+}
+
+function publicEmailMarkup() {
+  const email = siteConfig.contact?.email || "";
+  if (isSet(email) && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return `<a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a>`;
+  return `<span class="confirm-placeholder">Email to add: ${escapeHtml(email)}</span>`;
 }
 
 function renderHeader(headerTemplate) {
@@ -123,14 +128,9 @@ function contactSection(className = "contact-links") {
 
 function optionalWorkSection() {
   if (!siteConfig.showWork) return "";
-  const work = siteConfig.workPlaceholder || {};
-  const title = isSet(work.title) ? work.title : "Project title to be added";
-  const category = isSet(work.category) ? work.category : "Project category to be added";
-  const description = isSet(work.description) ? work.description : "Add a real project summary when approved work is ready to share.";
-  const image = normalizeUrl(work.image) || (isSet(work.image) && work.image.startsWith("/") ? sitePath(work.image) : "");
-  const card = image ? `<img src="${escapeHtml(image)}" alt="${escapeHtml(isSet(work.imageAlt) ? work.imageAlt : "")}" loading="lazy" decoding="async">` : `<div class="work-image-placeholder" aria-hidden="true">Project image</div>`;
-  const action = normalizeUrl(work.url);
-  return `<section class="service-page-section optional-work-section" id="selected-work"><div class="container"><p class="section-index"><span>10</span> Selected work</p><div class="service-page-heading"><h2>Work, when it is ready to share.</h2><p>Only approved, real projects belong here.</p></div><article class="work-placeholder">${card}<div><p class="section-index">${escapeHtml(category)}</p><h3>${escapeHtml(title)}</h3><p>${escapeHtml(description)}</p>${action ? `<a class="text-link" href="${escapeHtml(action)}">View project ↗</a>` : ""}</div></article></div></section>`;
+  const items = siteConfig.confirm?.WORK_ITEMS || [];
+  const cards = items.map((item) => `<article class="work-sample"><p class="work-sample-label">${escapeHtml(item.label)}</p><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p></article>`).join("");
+  return `<section class="service-page-section optional-work-section" id="selected-work" aria-labelledby="selected-work-title"><div class="container"><p class="section-index"><span>10</span> Samples</p><div class="service-page-heading"><h2 id="selected-work-title">A look at the work.</h2><p>These marked placeholders are sample deliverables, not client projects.</p></div><div class="work-samples">${cards}</div></div></section>`;
 }
 
 function optionalTeamSection() {
@@ -161,8 +161,6 @@ function renderHome(homeTemplate, header, footer, script) {
     logo: absoluteSiteUrl("/logo.png"),
     description
   };
-  const formUrlLiteral = "https://docs.google.com/forms/d/e/1FAIpQLScEimmQcJ5gNqr6mEWS4R6MxZFv5MR0CuxHeQQpt6AZggRN8A/viewform?usp=header";
-  homeTemplate = homeTemplate.replaceAll(formUrlLiteral, escapeHtml(formUrl));
   return fill(homeTemplate, {
     ...pageHead({ title: "ZEC — Digital Products Built With Intent", description, canonical: absoluteSiteUrl("/"), jsonLdContent: jsonLd(organization) }),
     OG_TYPE: "website",
@@ -171,10 +169,43 @@ function renderHome(homeTemplate, header, footer, script) {
     FOOTER: footer,
     SCRIPT: script,
     FORM_URL: escapeHtml(formUrl),
+    REPLY_TIME: escapeHtml(siteConfig.confirm.REPLY_TIME),
     SERVICE_DIRECTORY: serviceDirectory(),
     CONTACT_LINKS: contactSection(),
     OPTIONAL_WORK: optionalWorkSection(),
     OPTIONAL_TEAM: optionalTeamSection()
+  });
+}
+
+function renderStart(template, header, footer, script) {
+  const canonical = absoluteSiteUrl("/start");
+  const title = "Tell ZEC what needs to work";
+  const description = "Share a few details about your project. ZEC will reply with questions or a fit check before anything is scoped.";
+  const organization = { "@context": "https://schema.org", "@type": "Organization", name: "ZEC", url: absoluteSiteUrl("/") };
+  const projectTypeOptions = siteConfig.projectTypes
+    .map((item) => `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`)
+    .join("");
+  const budgetOptions = siteConfig.confirm.BUDGET_TIERS
+    .map((item) => `<label class="budget-option"><input type="radio" name="budget" value="${escapeHtml(item.value)}"><span>${escapeHtml(item.label)}</span></label>`)
+    .join("");
+  const budgetNeedsConfirmation = siteConfig.confirm.BUDGET_TIERS.some((item) => item.label.includes("[CONFIRM:"));
+  const booking = normalizeUrl(siteConfig.contact?.bookingUrl || "");
+  const introCallLink = booking ? ` <a href="${escapeHtml(booking)}" target="_blank" rel="noopener noreferrer">Book a short intro call →</a>` : "";
+  const typeAliases = escapeHtml(JSON.stringify(siteConfig.projectTypeAliases || {}));
+  return fill(template, {
+    ...pageHead({ title, description, canonical, jsonLdContent: jsonLd(organization) }),
+    BASE_PATH: escapeHtml(BASE_PATH),
+    HEADER: header,
+    FOOTER: footer,
+    SCRIPT: script,
+    API_ENDPOINT: escapeHtml(sitePath("/api/start")),
+    TYPE_ALIASES: typeAliases,
+    PROJECT_TYPE_OPTIONS: projectTypeOptions,
+    BUDGET_OPTIONS: budgetOptions,
+    BUDGET_NOTE: budgetNeedsConfirmation ? "These ranges are placeholders and need confirmation before launch." : "Choose a range or say you are not sure yet.",
+    REPLY_TIME: escapeHtml(siteConfig.confirm.REPLY_TIME),
+    CONTACT_EMAIL: publicEmailMarkup(),
+    INTRO_CALL_LINK: introCallLink
   });
 }
 
@@ -263,6 +294,7 @@ const scriptTemplate = fs.readFileSync(path.join(templateDir, "partials", "home-
 const homeTemplate = fs.readFileSync(path.join(templateDir, "home.html"), "utf8");
 const serviceTemplate = fs.readFileSync(path.join(templateDir, "service.html"), "utf8");
 const hubTemplate = fs.readFileSync(path.join(templateDir, "services-index.html"), "utf8");
+const startTemplate = fs.readFileSync(path.join(templateDir, "start.html"), "utf8");
 const header = renderHeader(headerTemplate);
 const footer = renderFooter(footerTemplate);
 
@@ -274,6 +306,7 @@ fs.copyFileSync(path.join(repoRoot, "favicon.png"), path.join(outputDir, "favico
 
 write(pageOutputPath("/"), renderHome(homeTemplate, header, footer, scriptTemplate));
 write(pageOutputPath("/services"), renderHub(hubTemplate, header, footer, scriptTemplate));
+write(pageOutputPath("/start"), renderStart(startTemplate, header, footer, scriptTemplate));
 for (const service of services) write(pageOutputPath(`/services/${service.slug}`), renderService(service, serviceTemplate, header, footer, scriptTemplate));
 write("404.html", fill(fs.readFileSync(path.join(templateDir, "404.html"), "utf8"), {
   BASE_PATH: escapeHtml(BASE_PATH),
@@ -285,10 +318,10 @@ write("404.html", fill(fs.readFileSync(path.join(templateDir, "404.html"), "utf8
   FORM_URL: escapeHtml(formUrl)
 }));
 
-const sitemapRoutes = ["/", "/services", ...services.map((service) => `/services/${service.slug}`)];
+const sitemapRoutes = ["/", "/services", "/start", ...services.map((service) => `/services/${service.slug}`)];
 const sitemapUrls = sitemapRoutes.map(absoluteSiteUrl);
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapUrls.map((url) => `  <url><loc>${escapeHtml(url)}</loc></url>`).join("\n")}\n</urlset>\n`);
 write("robots.txt", `User-agent: *\nAllow: ${BASE_PATH || "/"}/\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 if (target === "github-pages") write(".nojekyll", "");
 
-console.log(`Built ${target} output at ${outputDir}: homepage, service directory and ${services.length} service pages (BASE_PATH=${BASE_PATH || "(empty)"}, SITE_URL=${SITE_URL}).`);
+console.log(`Built ${target} output at ${outputDir}: homepage, start form, service directory and ${services.length} service pages (BASE_PATH=${BASE_PATH || "(empty)"}, SITE_URL=${SITE_URL}).`);

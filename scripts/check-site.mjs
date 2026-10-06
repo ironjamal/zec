@@ -19,7 +19,7 @@ const sitePathname = new URL(siteUrl).pathname.replace(/\/$/, "");
 const errors = [];
 const titles = new Set();
 const canonicalUrls = new Set();
-const routes = ["/", "/services", ...services.map((service) => `/services/${service.slug}`)];
+const routes = ["/", "/services", "/start", ...services.map((service) => `/services/${service.slug}`)];
 
 if (sitePathname !== basePrefix) errors.push(`SITE_URL path (${sitePathname || "(empty)"}) does not match BASE_PATH (${basePrefix || "(empty)"}).`);
 
@@ -74,6 +74,7 @@ const pages = routes.map((route) => ({ route, file: pageFile(route), url: absolu
 for (const page of pages) {
   if (!fs.existsSync(page.file)) { errors.push(`Missing page output: ${path.relative(outputRoot, page.file)}`); continue; }
   const html = fs.readFileSync(page.file, "utf8");
+  if (/docs\.google\.com\/forms/i.test(html)) errors.push(`Google Form link remains in ${page.route}.`);
   const title = html.match(/<title>([^<]+)<\/title>/i)?.[1] || "";
   const description = html.match(/<meta\s+name="description"\s+content="([^"]*)"/i)?.[1] || "";
   const canonical = html.match(/<link\s+rel="canonical"\s+href="([^"]+)"/i)?.[1] || "";
@@ -90,6 +91,13 @@ for (const page of pages) {
   if (ogImage !== expectedImage || twitterImage !== expectedImage) errors.push(`Open Graph/Twitter image does not match target SITE_URL: ${page.route}`);
   if ((html.match(/<h1\b/gi) || []).length !== 1) errors.push(`Expected exactly one H1: ${page.route}`);
   if (/\{\{[^}]*\}\}|\bundefined\b|\bnull\b/i.test(html)) errors.push(`Raw placeholder/undefined/null in ${page.route}`);
+  if (page.route === "/start") {
+    if (!/<form\b[^>]*id="start-form"/i.test(html)) errors.push("Start page is missing its project enquiry form.");
+    if (!/company_website_check/.test(html)) errors.push("Start page is missing its spam honeypot field.");
+    const requiredFields = html.match(/<(?:input|select|textarea)\b[^>]*\brequired(?:\s|>|=)/gi) || [];
+    if (requiredFields.length > 5) errors.push(`Start page has more than five required form fields (${requiredFields.length}).`);
+    if (!/aria-live="polite"/.test(html) || !/id="start-confirmation"/.test(html)) errors.push("Start page is missing its accessible confirmation panel.");
+  }
 
   const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]));
   for (const match of html.matchAll(/\b(?:href|src|srcset)="([^"]+)"/g)) {

@@ -8,6 +8,7 @@
     "build:github-pages": "node scripts/build.mjs --target github-pages",
     "check": "node scripts/check-site.mjs --target vercel",
     "check:vercel": "node scripts/check-site.mjs --target vercel",
+    "test": "node --test",
     "check:github-pages": "node scripts/check-site.mjs --target github-pages"
   }
 }

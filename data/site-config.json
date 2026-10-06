@@ -11,26 +11,94 @@
       "basePath": "/zec"
     }
   },
-  "projectFormUrl": "https://docs.google.com/forms/d/e/1FAIpQLScEimmQcJ5gNqr6mEWS4R6MxZFv5MR0CuxHeQQpt6AZggRN8A/viewform?usp=header",
   "contact": {
-    "whatsappNumber": "{{WHATSAPP_NUMBER}}",
-    "email": "{{CONTACT_EMAIL}}",
-    "bookingUrl": "{{BOOKING_URL}}"
+    "whatsappEnabled": false,
+    "whatsappNumber": "[CONFIRM: WHATSAPP_NUMBER — disabled until confirmed]",
+    "email": "[CONFIRM: CONTACT_EMAIL — add the public studio email]",
+    "bookingUrl": "[CONFIRM: INTRO_CALL_URL — optional calendar link]"
   },
-  "showWork": false,
+  "confirm": {
+    "REPLY_TIME": "[CONFIRM: REPLY_TIME — add a working-day range]",
+    "PRICE_FLOOR": "[CONFIRM: PRICE_FLOOR_AND_CURRENCY — add minimum project fee]",
+    "BUDGET_TIERS": [
+      { "value": "under-1000", "label": "[CONFIRM: Under $1,000]" },
+      { "value": "1000-3000", "label": "[CONFIRM: $1,000–3,000]" },
+      { "value": "3000-7500", "label": "[CONFIRM: $3,000–7,500]" },
+      { "value": "7500-15000", "label": "[CONFIRM: $7,500–15,000]" },
+      { "value": "15000-plus", "label": "[CONFIRM: $15,000+]" },
+      { "value": "unsure", "label": "Not sure yet, help me scope" }
+    ],
+    "TIMELINE_RANGES": "[CONFIRM: TIMELINE_RANGES — add typical ranges by project type]",
+    "NOT_FOR": [
+      "Lowest-price shoppers",
+      "Template-in-a-weekend jobs",
+      "[CONFIRM: NOT_FOR_ENTERPRISE_PROCUREMENT — confirm whether this is a fit]"
+    ],
+    "ECOMMERCE_OFFER_PLACEMENT": "[CONFIRM: ECOMMERCE_OFFER_PLACEMENT — nested under Websites or separate]",
+    "FOUNDER": {
+      "name": "[CONFIRM: FOUNDER_NAME]",
+      "role": "[CONFIRM: FOUNDER_ROLE]",
+      "photo": "[CONFIRM: FOUNDER_PHOTO]",
+      "credential": "[CONFIRM: FOUNDER_CREDENTIAL]"
+    },
+    "TEAM": [
+      {
+        "name": "[CONFIRM: TEAM_MEMBER_NAME]",
+        "role": "[CONFIRM: TEAM_MEMBER_ROLE]",
+        "photo": "[CONFIRM: TEAM_MEMBER_PHOTO]"
+      }
+    ],
+    "LOCATION_TIMEZONE": "[CONFIRM: LOCATION_AND_TIMEZONE]",
+    "WORK_ITEMS": [
+      {
+        "label": "Sample deliverable — placeholder",
+        "title": "Project brief preview to be added",
+        "description": "This marked sample slot is not a client project. Replace it with a reviewed brief excerpt."
+      },
+      {
+        "label": "Sample deliverable — placeholder",
+        "title": "Page map preview to be added",
+        "description": "This marked sample slot is not a client project. Replace it with a reviewed page map."
+      }
+    ]
+  },
+  "projectTypes": [
+    { "value": "website", "label": "Website or landing page" },
+    { "value": "redesign", "label": "Redesign" },
+    { "value": "store", "label": "Online store" },
+    { "value": "web-app", "label": "Web app or internal tool" },
+    { "value": "saas", "label": "SaaS MVP or platform" },
+    { "value": "automation", "label": "Automation or AI" },
+    { "value": "unsure", "label": "Not sure yet" }
+  ],
+  "projectTypeAliases": {
+    "websites": "website",
+    "website": "website",
+    "stores": "store",
+    "e-commerce": "store",
+    "web-apps": "web-app",
+    "web-app": "web-app",
+    "product": "saas",
+    "product-builds": "saas"
+  },
+  "autoReplyTemplate": {
+    "subject": "We received your note",
+    "body": "Thanks for getting in touch with ZEC. Here is what happens next:\n\n1. We’ll reply within {REPLY_TIME} with any questions or a fit check.\n2. If useful, we can arrange an optional short intro call{BOOKING_LINK}.\n3. If we’re a fit, we’ll send a scoped proposal with price and timeline. No work starts until scope is approved.\n\nZEC"
+  },
+  "showWork": true,
   "workPlaceholder": {
-    "title": "{{PROJECT_TITLE}}",
-    "category": "{{PROJECT_CATEGORY}}",
-    "description": "{{PROJECT_DESCRIPTION}}",
-    "image": "{{PROJECT_IMAGE}}",
-    "imageAlt": "{{PROJECT_IMAGE_ALT}}",
-    "url": "{{PROJECT_URL}}"
+    "title": "[CONFIRM: PROJECT_TITLE]",
+    "category": "[CONFIRM: PROJECT_CATEGORY]",
+    "description": "[CONFIRM: PROJECT_DESCRIPTION]",
+    "image": "[CONFIRM: PROJECT_IMAGE]",
+    "imageAlt": "[CONFIRM: PROJECT_IMAGE_ALT]",
+    "url": "[CONFIRM: PROJECT_URL]"
   },
   "showTeam": false,
   "teamPlaceholder": {
-    "name": "{{TEAM_MEMBER_NAME}}",
-    "role": "{{TEAM_MEMBER_ROLE}}",
-    "photo": "{{TEAM_MEMBER_PHOTO}}",
-    "photoAlt": "{{TEAM_MEMBER_PHOTO_ALT}}"
+    "name": "[CONFIRM: TEAM_MEMBER_NAME]",
+    "role": "[CONFIRM: TEAM_MEMBER_ROLE]",
+    "photo": "[CONFIRM: TEAM_MEMBER_PHOTO]",
+    "photoAlt": "[CONFIRM: TEAM_MEMBER_PHOTO_ALT]"
   }
 }

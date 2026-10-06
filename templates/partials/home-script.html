@@ -45,6 +45,8 @@
 
       const progressBar = document.getElementById("reading-progress-bar");
       const heroImage = document.querySelector(".hero-media");
+      const hero = document.querySelector(".hero");
+      if (!hero) siteHeader.classList.remove("is-on-hero");
       const darkSections = Array.from(document.querySelectorAll("[data-header-tone='dark']"));
       let scrollQueued = false;
       function updateScrollState() {
@@ -72,10 +74,12 @@
       updateScrollState();
 
       if ("IntersectionObserver" in window) {
-        const heroObserver = new IntersectionObserver(function (entries) {
-          entries.forEach(function (entry) { siteHeader.classList.toggle("is-on-hero", entry.isIntersecting && entry.intersectionRatio > 0.08); });
-        }, { threshold: [0, 0.08] });
-        heroObserver.observe(document.querySelector(".hero"));
+        if (hero) {
+          const heroObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) { siteHeader.classList.toggle("is-on-hero", entry.isIntersecting && entry.intersectionRatio > 0.08); });
+          }, { threshold: [0, 0.08] });
+          heroObserver.observe(hero);
+        }
 
         const sectionLinks = Array.from(primaryNav.querySelectorAll("a[href^='#']:not(.mobile-nav-cta)"));
         const sectionTargets = sectionLinks.map(function (link) { return document.querySelector(link.getAttribute("href")); }).filter(Boolean);
