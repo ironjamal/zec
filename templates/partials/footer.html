@@ -1,10 +1,12 @@
   <footer class="site-footer">
     <div class="container footer-top">
       <a class="footer-brand" href="{{BASE_PATH}}/" aria-label="ZEC home"><img src="{{BASE_PATH}}/logo.png" width="536" height="153" alt="ZEC"><span>Built with intent.</span></a>
-      <nav class="footer-nav" aria-label="Footer navigation"><a href="{{BASE_PATH}}/services">Services</a><a href="{{BASE_PATH}}/#solutions">Solutions</a><a href="{{BASE_PATH}}/#approach">Approach</a><a href="{{BASE_PATH}}/#about">About</a></nav>
-      <a class="footer-project" href="{{FORM_URL}}" target="_blank" rel="noopener noreferrer">Start a project <span aria-hidden="true">↗</span></a>
+      <nav class="footer-nav" aria-label="Footer navigation"><a href="{{BASE_PATH}}/services">Services</a><a href="{{BASE_PATH}}/#selected-work">{{WORK_LABEL}}</a><a href="{{BASE_PATH}}/#process">Process</a><a href="{{BASE_PATH}}/#about">About</a></nav>
+      <a class="footer-project" href="{{FORM_URL}}">Get in touch <span aria-hidden="true">→</span></a>
     </div>
-    {{FOOTER_SERVICES}}
-    {{FOOTER_CONTACT_LINKS}}
+    <div class="container footer-more">
+      {{FOOTER_OFFERS}}
+      <div class="footer-meta">{{FOOTER_CONTACT_LINKS}}<div class="footer-location"><span>Location / timezone</span><p>{{FOOTER_LOCATION_TIMEZONE}}</p></div></div>
+    </div>
     <div class="container footer-bottom"><span>© <span id="current-year">2026</span> ZEC</span><span>Strategy / Design / Development</span><a href="{{BASE_PATH}}/">Back to top ↑</a></div>
   </footer>
