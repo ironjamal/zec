@@ -22,6 +22,24 @@ function responseStub() {
   };
 }
 
+const environmentKeys = ["SUPABASE_URL", "SUPABASE_SECRET_KEY", "RESEND_API_KEY", "CONTACT_FROM_EMAIL", "CONTACT_TO_EMAIL"];
+
+async function withEnvironment(values, callback) {
+  const saved = Object.fromEntries(environmentKeys.map((key) => [key, process.env[key]]));
+  for (const key of environmentKeys) delete process.env[key];
+  for (const [key, value] of Object.entries(values)) {
+    if (value !== undefined) process.env[key] = value;
+  }
+  try {
+    return await callback();
+  } finally {
+    for (const key of environmentKeys) {
+      if (saved[key] === undefined) delete process.env[key];
+      else process.env[key] = saved[key];
+    }
+  }
+}
+
 test("accepts a well-formed project enquiry", () => {
   const { errors, value } = validateSubmission(validBody);
   assert.deepEqual(errors, {});
@@ -71,19 +89,72 @@ test("silently accepts a filled honeypot without delivering a message", async ()
   assert.deepEqual(res.body, { ok: true });
 });
 
-test("requires a delivery method after the reply-time promise is confirmed", async () => {
+test("requires Supabase settings after the reply-time promise is confirmed", async () => {
   const res = responseStub();
-  const deliveryVariables = ["CONTACT_WEBHOOK_URL", "CONTACT_WEBHOOK_TOKEN", "CONTACT_TO_EMAIL", "CONTACT_FROM_EMAIL", "RESEND_API_KEY"];
-  const savedValues = Object.fromEntries(deliveryVariables.map((key) => [key, process.env[key]]));
-  for (const key of deliveryVariables) delete process.env[key];
-  try {
+  await withEnvironment({}, async () => {
     await handler({ method: "POST", headers: {}, body: validBody }, res);
-  } finally {
-    for (const key of deliveryVariables) {
-      if (savedValues[key] === undefined) delete process.env[key];
-      else process.env[key] = savedValues[key];
-    }
-  }
+  });
   assert.equal(res.statusCode, 503);
   assert.match(res.body.error, /not configured yet/i);
+});
+
+test("stores a valid enquiry with the server-side Supabase key", async () => {
+  const res = responseStub();
+  const originalFetch = globalThis.fetch;
+  let request;
+  globalThis.fetch = async (url, options) => {
+    request = { url: String(url), ...options };
+    return { ok: true, status: 201 };
+  };
+  try {
+    await withEnvironment({
+      SUPABASE_URL: "https://zec-project.supabase.co",
+      SUPABASE_SECRET_KEY: "sb_secret_test"
+    }, async () => {
+      await handler({ method: "POST", headers: {}, body: validBody }, res);
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+
+  assert.equal(res.statusCode, 200);
+  assert.deepEqual(res.body, { ok: true });
+  assert.equal(request.url, "https://zec-project.supabase.co/rest/v1/contact_submissions");
+  assert.equal(request.method, "POST");
+  assert.equal(request.headers.apikey, "sb_secret_test");
+  assert.equal(request.headers.Prefer, "return=minimal");
+  assert.deepEqual(JSON.parse(request.body), {
+    project_type: "website",
+    project_type_label: "Website or landing page",
+    description: "Customers cannot compare our services online.",
+    name: "Jordan Example",
+    email: "jordan@example.com",
+    budget: "unsure",
+    budget_label: "Not sure yet, help me scope",
+    business_name: null,
+    website: null,
+    timeline: null,
+    phone: null
+  });
+});
+
+test("reports a failed Supabase insert without exposing provider details", async () => {
+  const res = responseStub();
+  const originalFetch = globalThis.fetch;
+  const originalConsoleError = console.error;
+  globalThis.fetch = async () => ({ ok: false, status: 401 });
+  console.error = () => {};
+  try {
+    await withEnvironment({
+      SUPABASE_URL: "https://zec-project.supabase.co",
+      SUPABASE_SECRET_KEY: "sb_secret_test"
+    }, async () => {
+      await handler({ method: "POST", headers: {}, body: validBody }, res);
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+    console.error = originalConsoleError;
+  }
+  assert.equal(res.statusCode, 502);
+  assert.doesNotMatch(JSON.stringify(res.body), /secret|supabase|401/i);
 });
