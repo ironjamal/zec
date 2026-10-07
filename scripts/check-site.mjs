@@ -124,8 +124,8 @@ for (const page of pages) {
   if (page.route === "/") {
     const homeMain = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] || "";
     const homeSections = [...homeMain.matchAll(/<section\b[^>]*\bid="([^"]+)"/gi)].map((match) => match[1]);
-    const expectedSections = ["top", "who-for", "samples", "selected-work", "offers", "process", "about", "faq", "contact"];
-    if (JSON.stringify(homeSections) !== JSON.stringify(expectedSections)) errors.push(`Homepage sections do not match the required nine-section order: ${homeSections.join(", ")}`);
+    const expectedSections = ["top", "who-for", "situations", "samples", "selected-work", "offers", "process", "about", "faq", "contact"];
+    if (JSON.stringify(homeSections) !== JSON.stringify(expectedSections)) errors.push(`Homepage sections do not match the required ten-section order: ${homeSections.join(", ")}`);
     if ((homeMain.match(/class="situation-card"/g) || []).length !== 4) errors.push("Homepage must render four situation cards.");
     if ((homeMain.match(/class="offer-card"/g) || []).length !== 3) errors.push("Homepage must render exactly three offer cards.");
     if ((homeMain.match(/class="faq-item"/g) || []).length !== 7) errors.push("Homepage must render seven FAQs.");
