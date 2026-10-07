@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import handler, { validateSubmission } from "../api/start.js";
 
 const validBody = {
@@ -8,7 +9,7 @@ const validBody = {
   budget: "unsure",
   name: "Jordan Example",
   email: "jordan@example.com",
-  company_website_check: ""
+  form_guard: ""
 };
 
 function responseStub() {
@@ -82,11 +83,11 @@ test("rejects methods other than POST", async () => {
   assert.equal(res.headers.Allow, "POST");
 });
 
-test("silently accepts a filled honeypot without delivering a message", async () => {
+test("rejects a filled honeypot instead of reporting a false success", async () => {
   const res = responseStub();
-  await handler({ method: "POST", headers: {}, body: { company_website_check: "bot" } }, res);
-  assert.equal(res.statusCode, 202);
-  assert.deepEqual(res.body, { ok: true });
+  await handler({ method: "POST", headers: {}, body: { form_guard: "autofilled" } }, res);
+  assert.equal(res.statusCode, 400);
+  assert.match(res.body.error, /could not be accepted/i);
 });
 
 test("requires Supabase settings after the reply-time promise is confirmed", async () => {
@@ -108,8 +109,8 @@ test("stores a valid enquiry with the server-side Supabase key", async () => {
   };
   try {
     await withEnvironment({
-      SUPABASE_URL: "https://zec-project.supabase.co",
-      SUPABASE_SECRET_KEY: "sb_secret_test"
+      SUPABASE_URL: "  \"https://zec-project.supabase.co/\"  ",
+      SUPABASE_SECRET_KEY: "  'unit-test-key'  "
     }, async () => {
       await handler({ method: "POST", headers: {}, body: validBody }, res);
     });
@@ -121,7 +122,8 @@ test("stores a valid enquiry with the server-side Supabase key", async () => {
   assert.deepEqual(res.body, { ok: true });
   assert.equal(request.url, "https://zec-project.supabase.co/rest/v1/contact_submissions");
   assert.equal(request.method, "POST");
-  assert.equal(request.headers.apikey, "sb_secret_test");
+  assert.equal(request.headers.apikey, "unit-test-key");
+  assert.equal(request.headers.Authorization, undefined);
   assert.equal(request.headers.Prefer, "return=minimal");
   assert.deepEqual(JSON.parse(request.body), {
     project_type: "website",
@@ -138,16 +140,26 @@ test("stores a valid enquiry with the server-side Supabase key", async () => {
   });
 });
 
-test("reports a failed Supabase insert without exposing provider details", async () => {
+test("logs a safe Supabase error body and returns a clear error without private data", async () => {
   const res = responseStub();
   const originalFetch = globalThis.fetch;
   const originalConsoleError = console.error;
-  globalThis.fetch = async () => ({ ok: false, status: 401 });
-  console.error = () => {};
+  const errorLogs = [];
+  const privateKey = "unit-test-key-do-not-log";
+  globalThis.fetch = async () => ({
+    ok: false,
+    status: 401,
+    text: async () => JSON.stringify({
+      code: "42501",
+      message: `Rejected request for ${validBody.email} using ${privateKey}`,
+      details: `Full user data: ${validBody.name}, ${validBody.description}`
+    })
+  });
+  console.error = (...values) => errorLogs.push(values.join(" "));
   try {
     await withEnvironment({
       SUPABASE_URL: "https://zec-project.supabase.co",
-      SUPABASE_SECRET_KEY: "sb_secret_test"
+      SUPABASE_SECRET_KEY: privateKey
     }, async () => {
       await handler({ method: "POST", headers: {}, body: validBody }, res);
     });
@@ -156,5 +168,44 @@ test("reports a failed Supabase insert without exposing provider details", async
     console.error = originalConsoleError;
   }
   assert.equal(res.statusCode, 502);
-  assert.doesNotMatch(JSON.stringify(res.body), /secret|supabase|401/i);
+  assert.match(res.body.error, /rejected your enquiry.*HTTP 401/i);
+  assert.match(errorLogs.join(" "), /HTTP 401/);
+  assert.match(errorLogs.join(" "), /42501/);
+  assert.match(errorLogs.join(" "), /\[redacted\]/);
+  assert.doesNotMatch(JSON.stringify({ body: res.body, logs: errorLogs }), /unit-test-key|Jordan Example|jordan@example.com|Customers cannot compare/);
+});
+
+test("form posts relative to the Vercel API and keeps its request fields aligned with the API", async () => {
+  const html = await readFile(new URL("../templates/start.html", import.meta.url), "utf8");
+  const form = html.match(/<form\b[^>]*id="start-form"[^>]*>[\s\S]*?<\/form>/)?.[0] || "";
+  assert.match(form, /action="\{\{API_ENDPOINT\}\}"/);
+  assert.match(form, /method="post"/);
+  assert.match(form, /data-endpoint="\{\{API_ENDPOINT\}\}"/);
+  assert.match(html, /fetch\(form\.dataset\.endpoint/);
+  for (const field of ["projectType", "description", "name", "email", "businessName", "website", "timeline", "phone", "form_guard"]) {
+    assert.match(form, new RegExp(`name="${field}"`), `missing form field ${field}`);
+  }
+  assert.match(form, /class="budget-options">\{\{BUDGET_OPTIONS\}\}<\/div>/);
+  assert.match(html, /if \(!response\.ok\)[\s\S]*?error\.textContent = result\.error[\s\S]*?error\.hidden = false/);
+});
+
+test("reports upstream Supabase server errors as a temporary save failure", async () => {
+  const res = responseStub();
+  const originalFetch = globalThis.fetch;
+  const originalConsoleError = console.error;
+  globalThis.fetch = async () => ({ ok: false, status: 503, text: async () => "upstream unavailable" });
+  console.error = () => {};
+  try {
+    await withEnvironment({
+      SUPABASE_URL: "https://zec-project.supabase.co",
+      SUPABASE_SECRET_KEY: "unit-test-key"
+    }, async () => {
+      await handler({ method: "POST", headers: {}, body: validBody }, res);
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+    console.error = originalConsoleError;
+  }
+  assert.equal(res.statusCode, 502);
+  assert.match(res.body.error, /could not save your enquiry.*HTTP 503/i);
 });

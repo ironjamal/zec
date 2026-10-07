@@ -173,7 +173,11 @@ for (const page of pages) {
     const numbers = [...html.matchAll(/class="section-index[^\"]*"[^>]*>\s*<span>(\d{2})<\/span>/g)].map((match) => match[1]);
     if (numbers.join(",") !== "01,02,03") errors.push("Start page section numbers must run from 01 through 03.");
     if (!/<form\b[^>]*id="start-form"/i.test(html)) errors.push("Start page is missing its project enquiry form.");
-    if (!/company_website_check/.test(html)) errors.push("Start page is missing its spam honeypot field.");
+    if (!/name="form_guard"/.test(html)) errors.push("Start page is missing its spam honeypot field.");
+    if (target === "vercel" && !/<form\b[^>]*action="\/api\/start"[^>]*data-endpoint="\/api\/start"/.test(html)) errors.push("Vercel start form must post to the relative /api/start function route.");
+    for (const field of ["projectType", "description", "budget", "name", "email", "businessName", "website", "timeline", "phone", "form_guard"]) {
+      if (!new RegExp(`name="${field}"`).test(html)) errors.push(`Start page is missing the ${field} submission field.`);
+    }
     const requiredFields = html.match(/<(?:input|select|textarea)\b[^>]*\brequired(?:\s|>|=)/gi) || [];
     if (requiredFields.length > 5) errors.push(`Start page has more than five required form fields (${requiredFields.length}).`);
     if (!/aria-live="polite"/.test(html) || !/id="start-confirmation"/.test(html)) errors.push("Start page is missing its accessible confirmation panel.");
