@@ -17,6 +17,7 @@ const SITE_URL = (process.env.SITE_URL || targetConfig.siteUrl || siteConfig.sit
 const BASE_PATH = normalizeBasePath(process.env.BASE_PATH ?? targetConfig.basePath ?? siteConfig.basePath ?? "");
 const formUrl = sitePath("/start");
 const ogImage = `${SITE_URL}/assets/og-image.jpg`;
+const ogImageAlt = "Black-and-white photograph of a geometric concrete building, also used in the ZEC hero.";
 
 if (!/^https?:\/\//i.test(SITE_URL)) throw new Error("SITE_URL must be an absolute http(s) URL.");
 if (new URL(SITE_URL).pathname.replace(/\/$/, "") !== BASE_PATH) throw new Error(`SITE_URL path and BASE_PATH must match (SITE_URL path: ${new URL(SITE_URL).pathname}, BASE_PATH: ${BASE_PATH || "(empty)"}).`);
@@ -24,6 +25,7 @@ if (!Array.isArray(services) || services.length !== 7) throw new Error("Expected
 if (new Set(services.map((service) => service.slug)).size !== services.length) throw new Error("Service slugs must be unique.");
 for (const service of services) {
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(service.slug)) throw new Error(`Invalid service slug: ${service.slug}`);
+  if (typeof service.metaDescription !== "string" || service.metaDescription.length < 100 || service.metaDescription.length > 160) throw new Error(`${service.name} needs a page-specific meta description between 100 and 160 characters.`);
   if (!Array.isArray(service.audience) || service.audience.length < 3 || service.audience.length > 4) throw new Error(`${service.name} must define three or four audience situations.`);
   if (!Array.isArray(service.deliverables) || service.deliverables.length < 6 || service.deliverables.length > 8) throw new Error(`${service.name} must define six to eight deliverables.`);
   if (!Array.isArray(service.process) || service.process.length !== 6) throw new Error(`${service.name} must define six method stages.`);
@@ -38,6 +40,7 @@ if (homepageOffers.length !== 3) throw new Error("The homepage must define exact
 if (new Set(homepageOffers.map((offer) => offer.id)).size !== homepageOffers.length || homepageOffers.some((offer) => !/^[a-z0-9-]+$/.test(offer.id))) throw new Error("Offer IDs must be unique lowercase slugs.");
 if (groupedServiceSlugs.length !== services.length || new Set(groupedServiceSlugs).size !== services.length || services.some((service) => !groupedServiceSlugs.includes(service.slug))) throw new Error("The three offers must group every service page exactly once.");
 if (!Array.isArray(siteConfig.homepage?.processStages) || siteConfig.homepage.processStages.length !== 6) throw new Error("The homepage must define six process stages.");
+if (publishedSampleDeliverables.some((item) => typeof item.metaDescription !== "string" || item.metaDescription.length < 100 || item.metaDescription.length > 160)) throw new Error("Published sample pages need meta descriptions between 100 and 160 characters.");
 if (new Set(publishedSampleDeliverables.map((item) => item.route)).size !== publishedSampleDeliverables.length || publishedSampleDeliverables.some((item) => !/^\/samples\/[a-z0-9-]+$/.test(item.route) || !Array.isArray(item.sections) || item.sections.length < 2)) throw new Error("Published sample deliverables need unique sample routes and at least two content sections.");
 
 function escapeHtml(value = "") {
@@ -248,11 +251,23 @@ function listItems(items, className, renderItem) {
 }
 
 function pageHead({ title, description, canonical, jsonLdContent }) {
-  return { TITLE: escapeHtml(title), DESCRIPTION: escapeHtml(description), CANONICAL: escapeHtml(canonical), OG_IMAGE: escapeHtml(ogImage), JSONLD: jsonLdContent };
+  return {
+    TITLE: escapeHtml(title),
+    DESCRIPTION: escapeHtml(description),
+    CANONICAL: escapeHtml(canonical),
+    OG_TYPE: "website",
+    OG_IMAGE: escapeHtml(ogImage),
+    OG_IMAGE_ALT: escapeHtml(ogImageAlt),
+    OG_IMAGE_TYPE: "image/jpeg",
+    OG_IMAGE_WIDTH: "1200",
+    OG_IMAGE_HEIGHT: "630",
+    JSONLD: jsonLdContent
+  };
 }
 
 function renderHome(homeTemplate, header, footer, script) {
-  const description = "ZEC designs and builds websites, online stores, web apps, internal tools and early product versions around the work a business needs to do.";
+  const title = "ZEC | Websites, Stores & Software for Growing Businesses";
+  const description = "ZEC is an independent digital studio designing and building business websites, online stores, web apps and first product releases for growing businesses.";
   const organization = {
     "@context": "https://schema.org",
     "@type": "Organization",
@@ -262,7 +277,7 @@ function renderHome(homeTemplate, header, footer, script) {
     description
   };
   return fill(homeTemplate, {
-    ...pageHead({ title: "ZEC — Digital Products Built With Intent", description, canonical: absoluteSiteUrl("/"), jsonLdContent: jsonLd(organization) }),
+    ...pageHead({ title, description, canonical: absoluteSiteUrl("/"), jsonLdContent: jsonLd(organization) }),
     OG_TYPE: "website",
     BASE_PATH: escapeHtml(BASE_PATH),
     HEADER: header,
@@ -297,8 +312,8 @@ function renderHome(homeTemplate, header, footer, script) {
 
 function renderSampleDeliverable(item, template, header, footer, script) {
   const canonical = absoluteSiteUrl(item.route);
-  const title = `${item.title} — Sample deliverable | ZEC`;
-  const description = item.description;
+  const title = `${item.title} — Sample | ZEC`;
+  const description = item.metaDescription;
   const otherSamples = publishedSampleDeliverables
     .filter((other) => other.route !== item.route)
     .map((other) => `<a href="${escapeHtml(sitePath(other.route))}">View ${escapeHtml(other.title)}</a>`)
@@ -322,8 +337,8 @@ function renderSampleDeliverable(item, template, header, footer, script) {
 
 function renderStart(template, header, footer, script) {
   const canonical = absoluteSiteUrl("/start");
-  const title = "Tell ZEC what needs to work";
-  const description = "Share a few details about your project. ZEC will reply with questions or a fit check before anything is scoped.";
+  const title = "Start a Project with ZEC | Websites & Software";
+  const description = `Tell ZEC about a website, store or software project. Share what needs to work; ZEC will reply ${siteConfig.confirm.REPLY_TIME.toLowerCase()} with questions or a fit check.`;
   const organization = { "@context": "https://schema.org", "@type": "Organization", name: "ZEC", url: absoluteSiteUrl("/") };
   const projectTypeOptions = siteConfig.projectTypes
     .map((item) => `<option value="${escapeHtml(item.value)}">${escapeHtml(item.label)}</option>`)
@@ -358,8 +373,8 @@ function renderFaqs(faqs) {
 
 function renderService(service, template, header, footer, script) {
   const canonical = absoluteSiteUrl(`/services/${service.slug}`);
-  const title = `ZEC — ${service.name} | Digital Products Built With Intent`;
-  const description = service.summary;
+  const title = `${service.name} | ZEC Digital Studio`;
+  const description = service.metaDescription;
   const organization = { "@type": "Organization", name: "ZEC", url: absoluteSiteUrl("/") };
   const schemas = [
     { "@context": "https://schema.org", "@type": "Service", name: service.name, serviceType: service.name, description: service.intro, url: canonical, provider: organization },
@@ -368,7 +383,7 @@ function renderService(service, template, header, footer, script) {
   const related = service.related.map((slug) => {
     const item = serviceBySlug.get(slug);
     if (!item) throw new Error(`${service.name} references unknown related service ${slug}.`);
-    return `<a class="service-entry" href="${sitePath(`/services/${item.slug}`)}"><span class="service-no">${item.number}</span><span class="service-name">${escapeHtml(item.name)}</span><span class="service-detail">${escapeHtml(item.summary)}</span><span class="service-arrow" aria-hidden="true">↗</span></a>`;
+    return `<a class="service-entry" href="${sitePath(`/services/${item.slug}`)}"><span class="service-no">${item.number}</span><span class="service-name">${escapeHtml(item.name)}</span><span class="service-detail">${escapeHtml(item.summary)}</span><span class="service-arrow" aria-hidden="true">→</span></a>`;
   }).join("\n");
   const price = isSet(service.priceFrom) ? `Typically starts from ${escapeHtml(service.priceFrom)}.` : "Typically starts from a scoped estimate; the amount follows the agreed deliverables and integrations.";
   const duration = isSet(service.durationRange) ? escapeHtml(service.durationRange) : "Set after the workflow, integrations and review schedule are scoped.";
@@ -401,8 +416,8 @@ function renderService(service, template, header, footer, script) {
 }
 
 function renderHub(template, header, footer, script) {
-  const title = "ZEC Services — Websites, Digital Products and Systems";
-  const description = "Explore ZEC services across websites, web applications, digital platforms, e-commerce, SaaS MVPs, custom systems and workflow automation.";
+  const title = "Services: Websites, Web Apps & Product Builds | ZEC";
+  const description = "Explore ZEC's websites and stores, web apps and internal tools, and product builds, with seven service pages for project detail.";
   const canonical = absoluteSiteUrl("/services");
   const collection = {
     "@context": "https://schema.org",

@@ -20,6 +20,7 @@ const siteOrigin = new URL(siteUrl).origin;
 const sitePathname = new URL(siteUrl).pathname.replace(/\/$/, "");
 const errors = [];
 const titles = new Set();
+const descriptions = new Set();
 const canonicalUrls = new Set();
 const routes = ["/", "/services", "/start", ...services.map((service) => `/services/${service.slug}`), ...sampleRoutes];
 const homepageOffers = siteConfig.homepage?.offers || [];
@@ -82,17 +83,31 @@ for (const page of pages) {
   const title = html.match(/<title>([^<]+)<\/title>/i)?.[1] || "";
   const description = html.match(/<meta\s+name="description"\s+content="([^"]*)"/i)?.[1] || "";
   const canonical = html.match(/<link\s+rel="canonical"\s+href="([^"]+)"/i)?.[1] || "";
+  const ogTitle = html.match(/<meta\s+property="og:title"\s+content="([^"]*)"/i)?.[1] || "";
+  const ogDescription = html.match(/<meta\s+property="og:description"\s+content="([^"]*)"/i)?.[1] || "";
   const ogUrl = html.match(/<meta\s+property="og:url"\s+content="([^"]+)"/i)?.[1] || "";
   const ogImage = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/i)?.[1] || "";
+  const ogImageAlt = html.match(/<meta\s+property="og:image:alt"\s+content="([^"]*)"/i)?.[1] || "";
+  const ogImageType = html.match(/<meta\s+property="og:image:type"\s+content="([^"]*)"/i)?.[1] || "";
+  const ogImageSize = `${html.match(/<meta\s+property="og:image:width"\s+content="([^"]*)"/i)?.[1] || ""}x${html.match(/<meta\s+property="og:image:height"\s+content="([^"]*)"/i)?.[1] || ""}`;
+  const ogSiteName = html.match(/<meta\s+property="og:site_name"\s+content="([^"]*)"/i)?.[1] || "";
+  const twitterTitle = html.match(/<meta\s+name="twitter:title"\s+content="([^"]*)"/i)?.[1] || "";
+  const twitterDescription = html.match(/<meta\s+name="twitter:description"\s+content="([^"]*)"/i)?.[1] || "";
   const twitterImage = html.match(/<meta\s+name="twitter:image"\s+content="([^"]+)"/i)?.[1] || "";
+  const twitterImageAlt = html.match(/<meta\s+name="twitter:image:alt"\s+content="([^"]*)"/i)?.[1] || "";
   if (!title || !description || !canonical) errors.push(`Missing title, description or canonical: ${page.route}`);
   if (canonical !== page.url) errors.push(`Incorrect canonical in ${page.route}: ${canonical}`);
   if (ogUrl !== page.url) errors.push(`Incorrect og:url in ${page.route}: ${ogUrl}`);
   if (titles.has(title)) errors.push(`Duplicate title: ${title}`);
+  if (descriptions.has(description)) errors.push(`Duplicate meta description: ${page.route}`);
   if (canonicalUrls.has(canonical)) errors.push(`Duplicate canonical: ${canonical}`);
-  titles.add(title); canonicalUrls.add(canonical);
+  if (description.length < 100 || description.length > 160) errors.push(`Meta description should be 100–160 characters in ${page.route} (got ${description.length}).`);
+  titles.add(title); descriptions.add(description); canonicalUrls.add(canonical);
   const expectedImage = absoluteSiteUrl("/assets/og-image.jpg");
   if (ogImage !== expectedImage || twitterImage !== expectedImage) errors.push(`Open Graph/Twitter image does not match target SITE_URL: ${page.route}`);
+  if (ogTitle !== title || twitterTitle !== title) errors.push(`Open Graph/Twitter title does not match the page title: ${page.route}`);
+  if (ogDescription !== description || twitterDescription !== description) errors.push(`Open Graph/Twitter description does not match the page description: ${page.route}`);
+  if (ogSiteName !== "ZEC" || !ogImageAlt || twitterImageAlt !== ogImageAlt || ogImageType !== "image/jpeg" || ogImageSize !== "1200x630") errors.push(`Incomplete Open Graph/Twitter image metadata: ${page.route}`);
   if ((html.match(/<h1\b/gi) || []).length !== 1) errors.push(`Expected exactly one H1: ${page.route}`);
   if (/\{\{[^}]*\}\}|\bundefined\b|\bnull\b/i.test(html)) errors.push(`Raw placeholder/undefined/null in ${page.route}`);
   const primaryNav = html.match(/<nav class="primary-nav"[^>]*>([\s\S]*?)<\/nav>/i)?.[1] || "";
@@ -128,6 +143,9 @@ for (const page of pages) {
     if (/class="(?:visual-break|manifesto-section|capabilities-section|solutions-section)"/.test(homeMain)) errors.push("Homepage still contains a section removed by the nine-section redesign.");
     const hasPublishedWork = sampleItems.filter((item) => item.isPlaceholder !== true && item.label && item.title).length >= 2;
     if (hasPublishedWork ? !primaryNav.includes("Work") : !primaryNav.includes("Samples")) errors.push("Homepage Work/Samples navigation label does not match the configured proof items.");
+    const numbers = [...homeMain.matchAll(/class="section-index[^"]*"[^>]*>\s*<span>(\d{2})<\/span>/g)].map((match) => match[1]);
+    const contactNumber = homeMain.match(/class="contact-index[^"]*"[^>]*>[\s\S]*?(\d{2})\s*—/i)?.[1] || "";
+    if (numbers.join(",") !== "01,02,03,04,05,06,07" || contactNumber !== "08") errors.push("Homepage section numbers must run from 01 through 08 in page order.");
   }
   if (page.route.startsWith("/samples/")) {
     if (!/class="sample-page"/.test(html)) errors.push(`Sample route is missing its sample page content: ${page.route}`);
@@ -142,8 +160,18 @@ for (const page of pages) {
   if (page.route === "/services") {
     if ((html.match(/class="service-offer-group"/g) || []).length !== 3) errors.push("Services page must group depth pages under three offers.");
     if ((html.match(/class="service-depth-link"/g) || []).length !== services.length) errors.push("Services page must list every depth page exactly once.");
+    const numbers = [...html.matchAll(/class="section-index[^\"]*"[^>]*>\s*<span>(\d{2})<\/span>/g)].map((match) => match[1]);
+    const contactNumber = html.match(/class="contact-index[^\"]*"[^>]*>[\s\S]*?(\d{2})\s*—/i)?.[1] || "";
+    if (numbers.join(",") !== "01" || contactNumber !== "02") errors.push("Services page section numbers must be 01 and 02 in page order.");
+  }
+  if (page.route.startsWith("/services/")) {
+    const numbers = [...html.matchAll(/class="section-index[^\"]*"[^>]*>\s*<span>(\d{2})<\/span>/g)].map((match) => match[1]);
+    const contactNumber = html.match(/class="contact-index[^\"]*"[^>]*>[\s\S]*?(\d{2})\s*—/i)?.[1] || "";
+    if (numbers.join(",") !== "01,02,03,04,05,06,07,08" || contactNumber !== "09") errors.push(`Service page section numbers are out of order: ${page.route}`);
   }
   if (page.route === "/start") {
+    const numbers = [...html.matchAll(/class="section-index[^\"]*"[^>]*>\s*<span>(\d{2})<\/span>/g)].map((match) => match[1]);
+    if (numbers.join(",") !== "01,02,03") errors.push("Start page section numbers must run from 01 through 03.");
     if (!/<form\b[^>]*id="start-form"/i.test(html)) errors.push("Start page is missing its project enquiry form.");
     if (!/company_website_check/.test(html)) errors.push("Start page is missing its spam honeypot field.");
     const requiredFields = html.match(/<(?:input|select|textarea)\b[^>]*\brequired(?:\s|>|=)/gi) || [];
