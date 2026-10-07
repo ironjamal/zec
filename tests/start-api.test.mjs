@@ -30,6 +30,22 @@ test("accepts a well-formed project enquiry", () => {
   assert.equal(value.budget, "unsure");
 });
 
+test("accepts each confirmed EGP budget option", () => {
+  const budgets = [
+    "under-7500-egp",
+    "7500-15000-egp",
+    "15000-30000-egp",
+    "30000-60000-egp",
+    "60000-120000-egp",
+    "120000-plus-egp"
+  ];
+  for (const budget of budgets) {
+    const { errors, value } = validateSubmission({ ...validBody, budget });
+    assert.deepEqual(errors, {});
+    assert.equal(value.budget, budget);
+  }
+});
+
 test("rejects missing required fields and an invalid website URL", () => {
   const { errors } = validateSubmission({
     projectType: "unknown",
@@ -55,9 +71,19 @@ test("silently accepts a filled honeypot without delivering a message", async ()
   assert.deepEqual(res.body, { ok: true });
 });
 
-test("does not accept submissions while the reply-time promise is unconfirmed", async () => {
+test("requires a delivery method after the reply-time promise is confirmed", async () => {
   const res = responseStub();
-  await handler({ method: "POST", headers: {}, body: validBody }, res);
+  const deliveryVariables = ["CONTACT_WEBHOOK_URL", "CONTACT_WEBHOOK_TOKEN", "CONTACT_TO_EMAIL", "CONTACT_FROM_EMAIL", "RESEND_API_KEY"];
+  const savedValues = Object.fromEntries(deliveryVariables.map((key) => [key, process.env[key]]));
+  for (const key of deliveryVariables) delete process.env[key];
+  try {
+    await handler({ method: "POST", headers: {}, body: validBody }, res);
+  } finally {
+    for (const key of deliveryVariables) {
+      if (savedValues[key] === undefined) delete process.env[key];
+      else process.env[key] = savedValues[key];
+    }
+  }
   assert.equal(res.statusCode, 503);
-  assert.match(res.body.error, /not ready yet/i);
+  assert.match(res.body.error, /not configured yet/i);
 });

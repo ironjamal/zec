@@ -93,7 +93,8 @@ function normalizeUrl(value) {
 function contactLinks(className = "contact-links") {
   const links = [];
   const number = siteConfig.contact?.whatsappNumber || "";
-  const digits = String(number).replace(/\D/g, "");
+  let digits = String(number).replace(/\D/g, "");
+  if (/^0\d{10}$/.test(digits)) digits = `20${digits.slice(1)}`;
   const whatsappUrl = normalizeUrl(number) || (isSet(number) && digits.length >= 8 ? `https://wa.me/${digits}` : "");
   if (siteConfig.contact?.whatsappEnabled && whatsappUrl) links.push(`<a href="${escapeHtml(whatsappUrl)}" target="_blank" rel="noopener noreferrer">WhatsApp <span aria-hidden="true">↗</span></a>`);
   const email = siteConfig.contact?.email || "";
@@ -146,7 +147,8 @@ function serviceOfferGroups() {
       if (!service) throw new Error(`Offer ${offer.title} references unknown service ${slug}.`);
       return `<a class="service-depth-link" href="${sitePath(`/services/${service.slug}`)}"><span class="service-no">${service.number}</span><span><strong>${escapeHtml(service.name)}</strong><small>${escapeHtml(service.summary)}</small></span><span class="service-arrow" aria-hidden="true">→</span></a>`;
     }).join("");
-    const placement = offer.id === "websites-stores" ? `<p class="service-placement-note">E-commerce placement: ${escapeHtml(siteConfig.confirm.ECOMMERCE_OFFER_PLACEMENT)}</p>` : "";
+    const ecommercePlacement = siteConfig.confirm.ECOMMERCE_OFFER_PLACEMENT === "Core service" ? "E-commerce is a core service within Websites & stores." : `E-commerce placement: ${siteConfig.confirm.ECOMMERCE_OFFER_PLACEMENT}`;
+    const placement = offer.id === "websites-stores" ? `<p class="service-placement-note">${escapeHtml(ecommercePlacement)}</p>` : "";
     return `<section class="service-offer-group" aria-labelledby="service-offer-${escapeHtml(offer.id)}"><div><h3 id="service-offer-${escapeHtml(offer.id)}">${escapeHtml(offer.title)}</h3><p>${escapeHtml(offer.description)}</p>${placement}</div><div class="service-depth-links">${serviceLinks}</div></section>`;
   }).join("\n");
 }
@@ -193,9 +195,15 @@ function renderEmailCta() {
 }
 
 function renderHomeFaqs() {
+  const timelineRanges = typeof siteConfig.confirm.TIMELINE_RANGES === "string"
+    ? siteConfig.confirm.TIMELINE_RANGES
+    : Object.entries(siteConfig.confirm.TIMELINE_RANGES || {}).map(([type, range]) => {
+      const labels = { landing_page: "Landing page", business_website: "Business website", web_app: "Web app" };
+      return `${labels[type] || type}: ${range}`;
+    }).join("; ");
   const replacements = {
     PRICE_FLOOR: siteConfig.confirm.PRICE_FLOOR,
-    TIMELINE_RANGES: siteConfig.confirm.TIMELINE_RANGES,
+    TIMELINE_RANGES: timelineRanges,
     IDEAL_CLIENT: siteConfig.homepage.idealClient,
     NOT_FOR: siteConfig.confirm.NOT_FOR.join(", "),
     LOCATION_TIMEZONE: siteConfig.confirm.LOCATION_TIMEZONE
@@ -239,7 +247,7 @@ function renderHome(homeTemplate, header, footer, script) {
     SITUATIONS: renderSituations(),
     WORK_ITEMS: renderHomeWork(),
     FOUNDER_STRIP: renderFounderStrip(),
-    ECOMMERCE_OFFER_PLACEMENT: escapeHtml(siteConfig.confirm.ECOMMERCE_OFFER_PLACEMENT),
+    ECOMMERCE_OFFER_PLACEMENT: escapeHtml(siteConfig.confirm.ECOMMERCE_OFFER_PLACEMENT === "Core service" ? "E-commerce is a core service." : siteConfig.confirm.ECOMMERCE_OFFER_PLACEMENT),
     HOME_OFFERS: renderOfferCards(),
     FOUNDER_NAME: escapeHtml(siteConfig.confirm.FOUNDER.name),
     FOUNDER_ROLE: escapeHtml(siteConfig.confirm.FOUNDER.role),

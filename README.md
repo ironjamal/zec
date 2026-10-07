@@ -30,7 +30,7 @@ Both targets publish folder `index.html` routes, so `/services` and its service 
 
 The homepage has nine sections. Its four situations and three offers are grouped in `data/site-config.json` under `homepage`; the seven existing service URLs remain available as depth pages grouped below the offers on `/services`. The Work navigation label reads “Samples” until at least two non-placeholder proof items are configured.
 
-Public content and all business details still awaiting confirmation live in `data/site-config.json` under `confirm`. Replace each visible `[CONFIRM: ...]` value before launch. This includes the reply-time promise, budget ranges, price floor and currency, timelines, fit notes, founder/team details, location/timezone, work samples and the e-commerce offer placement. WhatsApp is disabled by default. The homepage currently shows two clearly labelled sample placeholders, not client work.
+Public contact, pricing, timelines, fit notes, founder/team details and location are configured in `data/site-config.json`. WhatsApp is enabled with the supplied Egyptian mobile number; the site converts its leading zero to Egypt's `20` country code for the wa.me link. The homepage currently shows two clearly labelled sample placeholders, not client work.
 
 `npm run lint` uses Node.js built-ins so the project stays dependency-free. It checks JavaScript and inline-script syntax, parses the JSON data files, and checks CSS comments, strings and block braces. It is a syntax and structure check, not a stylistic ESLint rule set.
 
