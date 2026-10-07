@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 27" role="presentation">
+  <defs>
+    <filter id="soft-focus" x="-30%" y="-40%" width="160%" height="180%">
+      <feGaussianBlur stdDeviation="2.1" />
+    </filter>
+  </defs>
+  <rect width="48" height="27" fill="#171717" />
+  <g filter="url(#soft-focus)" opacity=".82">
+    <path d="M-2 8 11 3l8 3 8-4 11 5 13-3v24H-2Z" fill="#6b6b6b" />
+    <path d="M4 0h9v20H4zm14 3h7v18h-7zm12-2h10v21H30z" fill="#f5f3f0" />
+    <path d="M0 19h16v8H0zm22-2h28v10H22z" fill="#000" />
+  </g>
+</svg>
