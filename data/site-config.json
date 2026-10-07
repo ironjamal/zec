@@ -13,6 +13,19 @@
   },
   "homepage": {
     "idealClient": "For an owner, founder or marketing or operations lead at a small-to-mid business or early-stage startup without an in-house design and development team, looking for one partner.",
+    "aboutIntro": "The studio is founder-led, with specialized collaborators supporting project delivery.",
+    "processStages": [
+      { "name": "Discover", "description": "Understand the business, audience, goals and constraints.", "output": "Project brief" },
+      { "name": "Define", "description": "Set the first scope, structure and priorities.", "output": "Page map or workflow outline" },
+      { "name": "Design", "description": "Review the important journeys and interface before development.", "output": "Reviewed designs or prototype" },
+      { "name": "Build", "description": "Implement the agreed release around its intended use.", "output": "Working first release" },
+      { "name": "Test", "description": "Check key paths, refine the experience and address issues.", "output": "Reviewed and tested release" },
+      { "name": "Launch", "description": "Publish the approved work and agree the handover.", "output": "Launch and handover" }
+    ],
+    "processNotes": [
+      { "title": "What we need from you", "text": "Share the business context, the problem you need to solve and any existing material. The remaining requirements are defined during discovery." },
+      { "title": "Handover", "text": "Handover contents and any follow-on support are agreed in the written scope before work begins." }
+    ],
     "situations": [
       { "text": "The site still describes an earlier version of the business.", "offerId": "websites-stores" },
       { "text": "I want to sell online with less friction.", "offerId": "websites-stores" },
@@ -98,17 +111,34 @@
     "WORK_ITEMS": [
       {
         "id": "sample-brief",
-        "label": "Sample deliverable — placeholder",
-        "title": "Project brief preview to be added",
-        "description": "This marked sample slot is not a client project. Replace it with a reviewed brief excerpt.",
-        "isPlaceholder": true
+        "label": "Sample deliverable",
+        "title": "Project brief outline",
+        "description": "A neutral example of the questions a brief can settle before scope and timing are agreed.",
+        "isPlaceholder": false,
+        "route": "/samples/project-brief",
+        "sections": [
+          { "heading": "Project objective", "text": "What should this project help people understand, decide or do?" },
+          { "heading": "Audience and context", "text": "Who needs this, and what are they trying to accomplish?" },
+          { "heading": "Current friction", "text": "Where does the present site or workflow create extra effort?" },
+          { "heading": "Scope boundary", "text": "Which pages, workflows or integrations belong in the first release?" },
+          { "heading": "Constraints and dependencies", "text": "What existing content, systems, access or review needs should be considered?" },
+          { "heading": "Open decisions", "text": "What needs an answer before scope, timing and estimate can be agreed?" }
+        ]
       },
       {
         "id": "sample-page-map",
-        "label": "Sample deliverable — placeholder",
-        "title": "Page map preview to be added",
-        "description": "This marked sample slot is not a client project. Replace it with a reviewed page map.",
-        "isPlaceholder": true
+        "label": "Sample deliverable",
+        "title": "Website page map",
+        "description": "An illustrative page structure for a small service-business website, not a client project.",
+        "isPlaceholder": false,
+        "route": "/samples/page-map",
+        "sections": [
+          { "heading": "Home", "text": "Introduce the offer, help visitors choose a next step and answer first questions." },
+          { "heading": "Services overview", "text": "Show the main services together so visitors can compare where to start." },
+          { "heading": "Service detail", "text": "Explain who a service is for, what it includes and how the work proceeds." },
+          { "heading": "About", "text": "Describe the people, delivery approach and relevant background." },
+          { "heading": "Contact", "text": "Collect the information needed to understand an enquiry and explain what happens next." }
+        ]
       }
     ]
   },
