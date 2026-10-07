@@ -30,13 +30,17 @@
       document.addEventListener("keydown", function (event) {
         if (!menuOpen) return;
         if (event.key === "Escape") { event.preventDefault(); setMenuOpen(false, true); }
+        if (event.key === "Tab" && mobileNavQuery.matches) {
+          const focusable = [siteHeader.querySelector(".brand")].concat(Array.from(primaryNav.querySelectorAll("a")), [menuToggle]);
+          const first = focusable[0];
+          const last = focusable[focusable.length - 1];
+          if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+          else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        }
       });
       mobileNavQuery.addEventListener("change", function () {
         if (!mobileNavQuery.matches && menuOpen) setMenuOpen(false, false);
         else setMenuOpen(menuOpen, false);
-      });
-      siteHeader.addEventListener("focusout", function (event) {
-        if (menuOpen && !siteHeader.contains(event.relatedTarget)) setMenuOpen(false, false);
       });
 
       const progressBar = document.getElementById("reading-progress-bar");
@@ -77,16 +81,13 @@
           heroObserver.observe(hero);
         }
 
-        const sectionLinks = Array.from(primaryNav.querySelectorAll("a[href*='#']:not(.mobile-nav-cta)"));
-        const sectionTargets = sectionLinks.map(function (link) {
-          const targetUrl = new URL(link.href, window.location.href);
-          return targetUrl.pathname === window.location.pathname && targetUrl.hash ? document.querySelector(targetUrl.hash) : false;
-        }).filter(Boolean);
+        const sectionLinks = Array.from(primaryNav.querySelectorAll("a[href^='#']:not(.mobile-nav-cta)"));
+        const sectionTargets = sectionLinks.map(function (link) { return document.querySelector(link.getAttribute("href")); }).filter(Boolean);
         const navigationObserver = new IntersectionObserver(function (entries) {
           const active = entries.filter(function (entry) { return entry.isIntersecting; }).sort(function (a, b) { return b.intersectionRatio - a.intersectionRatio; })[0];
           if (!active) return;
           sectionLinks.forEach(function (link) {
-            if (new URL(link.href, window.location.href).hash === "#" + active.target.id) link.setAttribute("aria-current", "location");
+            if (link.getAttribute("href") === "#" + active.target.id) link.setAttribute("aria-current", "location");
             else link.removeAttribute("aria-current");
           });
         }, { rootMargin: "-18% 0px -70% 0px", threshold: [0, .25, .5, .75, 1] });
@@ -109,43 +110,18 @@
         const processTitle = document.getElementById("process-current-title");
         const processCopy = document.getElementById("process-current-copy");
         const processFill = document.getElementById("process-progress-fill");
-        const processSection = document.querySelector(".homepage-process-section");
-        const processFocusCopy = document.getElementById("process-focus-copy");
-        if (steps.length && processSection && processNumber && processTitle && processCopy && processFill && processFocusCopy) {
-          processSection.classList.add("process-enhanced");
-          let activeIndex = -1;
-          let transitionTimer = 0;
-          const observedRatios = new Map();
-          function setActiveStage(index, immediate) {
-            if (index < 0 || index >= total || index === activeIndex) return;
-            activeIndex = index;
+        const processObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (!entry.isIntersecting) return;
+            const index = steps.indexOf(entry.target);
             steps.forEach(function (step, stepIndex) { step.classList.toggle("is-active", stepIndex === index); });
-            processNumber.textContent = String(index + 1).padStart(2, "0") + "/" + String(total).padStart(2, "0");
-            processFill.style.transform = "scaleX(" + ((index + 1) / total) + ")";
-            window.clearTimeout(transitionTimer);
-            if (immediate || reducedMotion) {
-              processTitle.textContent = steps[index].dataset.title;
-              processCopy.textContent = steps[index].dataset.copy;
-              processFocusCopy.classList.remove("is-switching");
-              return;
-            }
-            processFocusCopy.classList.add("is-switching");
-            transitionTimer = window.setTimeout(function () {
-              processTitle.textContent = steps[index].dataset.title;
-              processCopy.textContent = steps[index].dataset.copy;
-              requestAnimationFrame(function () { processFocusCopy.classList.remove("is-switching"); });
-            }, 175);
-          }
-          setActiveStage(0, true);
-          const processObserver = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) { observedRatios.set(entry.target, entry.isIntersecting ? entry.intersectionRatio : 0); });
-            const active = steps.map(function (step, index) { return { index: index, ratio: observedRatios.get(step) || 0 }; })
-              .filter(function (item) { return item.ratio >= 0.6; })
-              .sort(function (a, b) { return b.ratio - a.ratio; })[0];
-            if (active) setActiveStage(active.index, false);
-          }, { rootMargin: "-12% 0px -12% 0px", threshold: [0, 0.6, 0.75, 1] });
-          steps.forEach(function (step) { processObserver.observe(step); });
-        }
+            processNumber.textContent = String(index + 1).padStart(2, "0") + " / " + String(total).padStart(2, "0");
+            processTitle.textContent = entry.target.dataset.title;
+            processCopy.textContent = entry.target.dataset.copy;
+            processFill.style.transform = "scaleX(" + (index / Math.max(1, steps.length - 1)) + ")";
+          });
+        }, { rootMargin: "-43% 0px -43% 0px", threshold: 0 });
+        steps.forEach(function (step) { processObserver.observe(step); });
       }
 
       const faqItems = Array.from(document.querySelectorAll(".faq-item"));

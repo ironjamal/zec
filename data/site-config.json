@@ -26,32 +26,6 @@
       { "title": "What we need from you", "text": "Share the business context, the problem you need to solve and any existing material. The remaining requirements are defined during discovery." },
       { "title": "Handover", "text": "Handover contents and any follow-on support are agreed in the written scope before work begins." }
     ],
-    "conceptWork": [
-      {
-        "id": "product-catalogue",
-        "name": "Product catalogue",
-        "category": "E-commerce",
-        "outcome": "Give a considered product range a clear route from discovery to checkout.",
-        "tags": ["E-commerce", "Concept work"],
-        "preview": "shop"
-      },
-      {
-        "id": "service-website",
-        "name": "Service website",
-        "category": "Website",
-        "outcome": "Make a service offer, its approach and the next step easier to understand.",
-        "tags": ["Website", "Concept work"],
-        "preview": "website"
-      },
-      {
-        "id": "team-dashboard",
-        "name": "Team dashboard",
-        "category": "Web app",
-        "outcome": "Give a small team one clear view of open work and what needs attention.",
-        "tags": ["Web app", "Concept work"],
-        "preview": "dashboard"
-      }
-    ],
     "situations": [
       { "text": "The site still describes an earlier version of the business.", "offerId": "websites-stores" },
       { "text": "I want to sell online with less friction.", "offerId": "websites-stores" },
@@ -105,7 +79,7 @@
   },
   "confirm": {
     "REPLY_TIME": "Within 24 hours",
-    "PRICE_FLOOR": "8,000 EGP",
+    "PRICE_FLOOR": "Projects start from 8,000 EGP",
     "BUDGET_TIERS": [
       { "value": "under-7500-egp", "label": "Under 7,500 EGP" },
       { "value": "7500-15000-egp", "label": "7,500–15,000 EGP" },

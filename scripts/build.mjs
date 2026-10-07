@@ -34,14 +34,11 @@ for (const service of services) {
   if (!Array.isArray(service.related) || service.related.length !== 2 || service.related.some((slug) => !serviceBySlug.has(slug))) throw new Error(`${service.name} must reference two existing related services.`);
 }
 const homepageOffers = siteConfig.homepage?.offers || [];
-const conceptWork = siteConfig.homepage?.conceptWork || [];
 const publishedSampleDeliverables = (siteConfig.confirm?.WORK_ITEMS || []).filter((item) => item.isPlaceholder !== true && item.route);
 const groupedServiceSlugs = homepageOffers.flatMap((offer) => offer.serviceSlugs || []);
 if (homepageOffers.length !== 3) throw new Error("The homepage must define exactly three offers.");
 if (new Set(homepageOffers.map((offer) => offer.id)).size !== homepageOffers.length || homepageOffers.some((offer) => !/^[a-z0-9-]+$/.test(offer.id))) throw new Error("Offer IDs must be unique lowercase slugs.");
 if (groupedServiceSlugs.length !== services.length || new Set(groupedServiceSlugs).size !== services.length || services.some((service) => !groupedServiceSlugs.includes(service.slug))) throw new Error("The three offers must group every service page exactly once.");
-if (conceptWork.length !== 3) throw new Error("The homepage must define three selected concept projects.");
-if (new Set(conceptWork.map((item) => item.id)).size !== conceptWork.length || conceptWork.some((item) => !/^[a-z0-9-]+$/.test(item.id) || !["shop", "website", "dashboard"].includes(item.preview) || typeof item.name !== "string" || typeof item.category !== "string" || typeof item.outcome !== "string" || !Array.isArray(item.tags) || item.tags.length < 1)) throw new Error("Selected concept projects need unique IDs, a supported preview, a name, a category, an outcome and tags.");
 if (!Array.isArray(siteConfig.homepage?.processStages) || siteConfig.homepage.processStages.length !== 6) throw new Error("The homepage must define six process stages.");
 if (publishedSampleDeliverables.some((item) => typeof item.metaDescription !== "string" || item.metaDescription.length < 100 || item.metaDescription.length > 160)) throw new Error("Published sample pages need meta descriptions between 100 and 160 characters.");
 if (new Set(publishedSampleDeliverables.map((item) => item.route)).size !== publishedSampleDeliverables.length || publishedSampleDeliverables.some((item) => !/^\/samples\/[a-z0-9-]+$/.test(item.route) || !Array.isArray(item.sections) || item.sections.length < 2)) throw new Error("Published sample deliverables need unique sample routes and at least two content sections.");
@@ -174,7 +171,7 @@ function renderOfferCards() {
   return homepageOffers.map((offer) => {
     const startUrl = `${formUrl}?type=${encodeURIComponent(offer.projectType)}`;
     const servicesUrl = `${sitePath("/services")}#service-offer-${offer.id}`;
-    return `<article class="offer-card" id="offer-${escapeHtml(offer.id)}"><p class="offer-index">${String(homepageOffers.indexOf(offer) + 1).padStart(2, "0")}</p><h3>${escapeHtml(offer.title)}</h3><p>${escapeHtml(offer.description)}</p><p class="offer-fit">${escapeHtml(offer.fit)}</p><a class="offer-services-link" href="${escapeHtml(servicesUrl)}">Explore service pages</a><a class="offer-cta primary-action" href="${escapeHtml(startUrl)}">${escapeHtml(offer.cta)} <span aria-hidden="true">→</span></a></article>`;
+    return `<article class="offer-card" id="offer-${escapeHtml(offer.id)}"><p class="offer-index">${String(homepageOffers.indexOf(offer) + 1).padStart(2, "0")}</p><h3>${escapeHtml(offer.title)}</h3><p>${escapeHtml(offer.description)}</p><p class="offer-fit">${escapeHtml(offer.fit)}</p><a class="offer-services-link" href="${escapeHtml(servicesUrl)}">Explore service pages</a><a class="offer-cta" href="${escapeHtml(startUrl)}">${escapeHtml(offer.cta)} <span aria-hidden="true">→</span></a></article>`;
   }).join("");
 }
 
@@ -183,32 +180,13 @@ function renderHomeWork() {
   return items.map((item) => {
     const id = /^[a-z0-9-]+$/.test(item.id || "") ? ` id="${escapeHtml(item.id)}"` : "";
     const previewLink = item.route ? `<a class="work-sample-link" href="${escapeHtml(sitePath(item.route))}">Read the sample <span aria-hidden="true">→</span></a>` : "";
-    const previewRows = (item.sections || []).slice(0, 3).map((section, index) => `<div class="sample-preview-row"><span>${String(index + 1).padStart(2, "0")}</span><div><strong>${escapeHtml(section.heading)}</strong><p>${escapeHtml(section.text)}</p></div></div>`).join("");
-    const preview = `<div class="sample-preview" aria-hidden="true"><div class="sample-preview-topline"><span>ZEC / SAMPLE</span><span>0${items.indexOf(item) + 1}</span></div><div class="sample-preview-sheet"><p class="sample-preview-kicker">PROJECT DOCUMENT</p><h4>${escapeHtml(item.title)}</h4><div class="sample-preview-rows">${previewRows}</div><span class="sample-preview-footer">STRATEGY / STRUCTURE / SCOPE</span></div></div>`;
-    return `<article class="work-sample"${id}>${preview}<p class="work-sample-label">${escapeHtml(item.label)}</p><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p>${previewLink}</article>`;
+    return `<article class="work-sample"${id}><p class="work-sample-label">${escapeHtml(item.label)}</p><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p>${previewLink}</article>`;
   }).join("");
-}
-
-function renderConceptPreview(preview) {
-  const previews = {
-    shop: `<div class="concept-browser"><div class="concept-browser-bar"><span></span><span></span><span></span><b>PRODUCT CATALOGUE / 01</b></div><div class="concept-page concept-page-shop"><div class="concept-page-nav"><strong>STUDIO GOODS</strong><span>OBJECTS&nbsp;&nbsp; ABOUT&nbsp;&nbsp; BAG 0</span></div><p class="concept-eyebrow">A SMALL COLLECTION</p><h4>Objects for<br>everyday life.</h4><div class="concept-product-grid"><div><span>FORM / 01</span><b>Everyday chair</b></div><div><span>FORM / 02</span><b>Side table</b></div><div><span>FORM / 03</span><b>Desk lamp</b></div></div></div></div>`,
-    website: `<div class="concept-browser"><div class="concept-browser-bar"><span></span><span></span><span></span><b>SERVICE WEBSITE / 02</b></div><div class="concept-page concept-page-website"><div class="concept-page-nav"><strong>ATELIER / HOME</strong><span>SPACES&nbsp;&nbsp; APPROACH&nbsp;&nbsp; CONTACT</span></div><p class="concept-eyebrow">DESIGN / BUILD / CARE</p><h4>Space to do<br>your best work.</h4><div class="concept-website-bottom"><span>WORKPLACE DESIGN FOR GROWING TEAMS</span><b>EXPLORE THE APPROACH&nbsp; →</b></div></div></div>`,
-    dashboard: `<div class="concept-browser"><div class="concept-browser-bar"><span></span><span></span><span></span><b>TEAM DASHBOARD / 03</b></div><div class="concept-dashboard"><aside><strong>FIELDNOTE</strong><span>OVERVIEW</span><span>PROJECTS</span><span>PEOPLE</span><span>SETTINGS</span></aside><div class="concept-dashboard-main"><div class="concept-dashboard-heading"><span>WORKSPACE / OVERVIEW</span><b>THIS WEEK&nbsp;⌄</b></div><h4>Good morning,<br>team.</h4><div class="concept-dashboard-cards"><div><span>OPEN PROJECTS</span><strong>04</strong></div><div><span>NEEDS REVIEW</span><strong>02</strong></div><div><span>UP NEXT</span><strong>03</strong></div></div><div class="concept-dashboard-list"><span>PROJECT</span><span>STATUS</span><b>Website refresh</b><em>IN REVIEW</em><b>Product launch</b><em>IN PROGRESS</em></div></div></div></div>`
-  };
-  if (!previews[preview]) throw new Error(`Unsupported selected-work preview: ${preview}`);
-  return previews[preview];
-}
-
-function renderSelectedWork() {
-  return conceptWork.map((item) => {
-    const tags = item.tags.map((tag) => `<li>${escapeHtml(tag)}</li>`).join("");
-    return `<article class="selected-work-card"><div class="selected-work-preview selected-work-preview--${escapeHtml(item.preview)}" aria-hidden="true">${renderConceptPreview(item.preview)}</div><div class="selected-work-copy"><div class="selected-work-meta"><span>Concept work</span><span>${escapeHtml(item.category)}</span></div><h3>${escapeHtml(item.name)}</h3><p>${escapeHtml(item.outcome)}</p><ul aria-label="Project categories">${tags}</ul></div></article>`;
-  }).join("\n");
 }
 
 function renderProcessStages() {
   const stages = siteConfig.homepage.processStages;
-  return stages.map((stage, index) => `<li class="process-step${index === 0 ? " is-active" : ""}" data-title="${escapeHtml(stage.name)}" data-copy="${escapeHtml(stage.description)}"><span class="process-step-number">${String(index + 1).padStart(2, "0")}</span><div class="process-step-detail"><h3>${escapeHtml(stage.name)}</h3><p>${escapeHtml(stage.description)}</p><p class="process-step-output"><span>Output</span>${escapeHtml(stage.output)}</p></div></li>`).join("\n");
+  return stages.map((stage, index) => `<li class="process-step${index === 0 ? " is-active" : ""}" data-title="${escapeHtml(stage.name)}" data-copy="${escapeHtml(stage.description)}"><span>${String(index + 1).padStart(2, "0")}</span><h3>${escapeHtml(stage.name)}</h3><p>${escapeHtml(stage.description)}</p><p class="process-step-output"><span>Output</span>${escapeHtml(stage.output)}</p></li>`).join("\n");
 }
 
 function timelineLabel(type) {
@@ -308,13 +286,12 @@ function renderHome(homeTemplate, header, footer, script) {
     FORM_URL: escapeHtml(formUrl),
     SAMPLE_BRIEF_URL: escapeHtml(sitePath("/samples/project-brief")),
     ABOUT_INTRO: escapeHtml(siteConfig.homepage.aboutIntro),
-    PROCESS_CURRENT_NUMBER: `01/${String(siteConfig.homepage.processStages.length).padStart(2, "0")}`,
+    PROCESS_CURRENT_NUMBER: `01 / ${String(siteConfig.homepage.processStages.length).padStart(2, "0")}`,
     REPLY_TIME: escapeHtml(siteConfig.confirm.REPLY_TIME),
     IDEAL_CLIENT: escapeHtml(siteConfig.homepage.idealClient),
     NOT_FOR_ITEMS: siteConfig.confirm.NOT_FOR.map((item) => `<li${item.includes("[CONFIRM:") ? " class=\"is-confirm\"" : ""}>${escapeHtml(item)}</li>`).join(""),
     SITUATIONS: renderSituations(),
     WORK_ITEMS: renderHomeWork(),
-    SELECTED_WORK: renderSelectedWork(),
     FOUNDER_STRIP: renderFounderStrip(),
     ECOMMERCE_OFFER_PLACEMENT: escapeHtml(siteConfig.confirm.ECOMMERCE_OFFER_PLACEMENT === "Core service" ? "E-commerce is a core service." : siteConfig.confirm.ECOMMERCE_OFFER_PLACEMENT),
     HOME_OFFERS: renderOfferCards(),
@@ -383,7 +360,6 @@ function renderStart(template, header, footer, script) {
     TYPE_ALIASES: typeAliases,
     PROJECT_TYPE_OPTIONS: projectTypeOptions,
     BUDGET_OPTIONS: budgetOptions,
-    START_CONTACT_LINKS: contactLinks("start-contact-links"),
     BUDGET_NOTE: budgetNeedsConfirmation ? "These ranges are placeholders and need confirmation before launch." : "Choose a range or say you are not sure yet.",
     REPLY_TIME: escapeHtml(siteConfig.confirm.REPLY_TIME),
     CONTACT_EMAIL: publicEmailMarkup(),

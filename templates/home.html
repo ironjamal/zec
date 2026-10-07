@@ -38,10 +38,10 @@
 {{HEADER}}
   <main id="main">
     <section class="hero" id="top" aria-labelledby="hero-title">
-      <div class="hero-media" style="background: #171717 url('{{BASE_PATH}}/assets/zec-hero-placeholder.svg') center / cover no-repeat" aria-hidden="true">
+      <div class="hero-media" aria-hidden="true">
         <picture>
-          <source media="(max-width: 640px)" srcset="{{BASE_PATH}}/assets/zec-hero-architecture.webp" sizes="100vw">
-          <img src="{{BASE_PATH}}/assets/zec-architecture-break.webp" alt="" width="1800" height="990" sizes="100vw" fetchpriority="high" decoding="async">
+          <source media="(max-width: 640px)" srcset="{{BASE_PATH}}/assets/zec-hero-architecture.webp">
+          <img src="{{BASE_PATH}}/assets/zec-architecture-break.webp" alt="" width="1800" height="990" fetchpriority="high" decoding="async">
         </picture>
       </div>
       <div class="hero-shade" aria-hidden="true"></div>
@@ -55,7 +55,7 @@
           <div class="hero-aside">
             <p>ZEC is an independent digital studio. We start from how your business works, then design and build the site, store or tool that supports it.</p>
             <div class="hero-actions">
-              <a class="hero-cta primary-action" href="{{BASE_PATH}}/start">Tell us what needs to work <span aria-hidden="true">→</span></a>
+              <a class="hero-cta" href="{{BASE_PATH}}/start">Tell us what needs to work <span aria-hidden="true">→</span></a>
               <a class="hero-secondary" href="#selected-work">See selected work <span aria-hidden="true">↓</span></a>
             </div>
             <p class="hero-expectations">Reply within <strong>{{REPLY_TIME}}</strong> · No work starts until scope is approved.</p>
@@ -87,40 +87,22 @@
       </div>
     </section>
 
-    <section class="proof-section" id="samples" aria-labelledby="work-title">
+    <section class="proof-section" id="selected-work" aria-labelledby="work-title">
       <div class="container">
         <div class="proof-heading">
           <p class="section-index"><span>03</span> Samples</p>
-          <h2 id="work-title">See how decisions take shape.</h2>
-          <p>Two working documents show how a project can move from an open question to a clear structure.</p>
+          <h2 id="work-title">See how the work takes shape.</h2>
+          <p>These illustrative deliverables show how project decisions can be organized. They are not client projects.</p>
         </div>
         <div class="work-samples">{{WORK_ITEMS}}</div>
         {{FOUNDER_STRIP}}
       </div>
     </section>
 
-    <section class="selected-work-section" id="selected-work" aria-labelledby="selected-work-title">
-      <div class="container">
-        <div class="selected-work-heading">
-          <p class="section-index"><span>04</span> Selected work</p>
-          <div>
-            <h2 id="selected-work-title">Useful by design.</h2>
-            <p>Concept studies for the kinds of digital products ZEC builds. Each card is clearly labeled as concept work.</p>
-          </div>
-        </div>
-        <div class="selected-work-grid">{{SELECTED_WORK}}</div>
-        <div class="work-gallery-cta">
-          <p>Have a project with a job to do?</p>
-          <a class="primary-action" href="{{BASE_PATH}}/start">Tell us what needs to work <span aria-hidden="true">→</span></a>
-          <a class="work-gallery-secondary" href="{{BASE_PATH}}/services">Explore services</a>
-        </div>
-      </div>
-    </section>
-
     <section class="offers-section" id="offers" aria-labelledby="offers-title">
       <div class="container">
         <div class="offers-heading">
-          <p class="section-index"><span>05</span> Offers</p>
+          <p class="section-index"><span>04</span> Offers</p>
           <h2 id="offers-title">Three ways to start.</h2>
           <p>Explore the service pages for more detail on each offer.</p>
           <p class="confirm-note"><strong>{{ECOMMERCE_OFFER_PLACEMENT}}</strong></p>
@@ -131,16 +113,14 @@
 
     <section class="approach-section homepage-process-section" id="process" aria-labelledby="process-title">
       <div class="container approach-header">
-        <p class="section-index"><span>06</span> Process and expectations</p>
+        <p class="section-index"><span>05</span> Process and expectations</p>
         <div><h2 id="process-title" class="reveal">Make the right<br><em>thing, well.</em></h2><p class="approach-lead reveal">A connected six-stage process keeps the work useful from the first question to launch.</p></div>
       </div>
       <div class="container process-layout">
-        <aside class="process-focus" aria-label="Current process stage">
-          <span class="process-focus-label">Current stage <b id="process-current-number" aria-live="polite">{{PROCESS_CURRENT_NUMBER}}</b></span>
-          <div class="process-focus-copy" id="process-focus-copy" aria-live="polite" aria-atomic="true">
-            <h3 id="process-current-title">{{PROCESS_CURRENT_TITLE}}</h3>
-            <p id="process-current-copy">{{PROCESS_CURRENT_COPY}}</p>
-          </div>
+        <aside class="process-focus" aria-hidden="true">
+          <span class="process-focus-label">Current stage <b id="process-current-number">{{PROCESS_CURRENT_NUMBER}}</b></span>
+          <strong id="process-current-title">{{PROCESS_CURRENT_TITLE}}</strong>
+          <p id="process-current-copy">{{PROCESS_CURRENT_COPY}}</p>
           <div class="process-progress"><span id="process-progress-fill"></span></div>
           <span class="process-focus-foot">FROM IDEA / TO DIGITAL PRODUCT</span>
         </aside>
@@ -154,17 +134,9 @@
       <div class="container process-next"><p>No work starts until scope is approved.</p><a href="{{SAMPLE_BRIEF_URL}}">See a sample brief <span aria-hidden="true">→</span></a></div>
     </section>
 
-    <aside class="studio-note" id="studio-note" aria-labelledby="studio-note-title">
-      <div class="container studio-note-inner">
-        <p class="section-index"><span>07</span> Studio principle</p>
-        <h2 id="studio-note-title">Clear scope.<br>Useful handover.</h2>
-        <p>Review points, decisions and handover are agreed in writing before work begins.</p>
-      </div>
-    </aside>
-
     <section class="about-section home-about-section" id="about" aria-labelledby="about-title">
       <div class="container about-layout">
-        <p class="section-index"><span>08</span> About and people</p>
+        <p class="section-index"><span>06</span> About and people</p>
         <div class="about-content">
           <div>
             <h2 id="about-title">Business.<br>Design.<br>Technology.</h2>
@@ -183,14 +155,14 @@
 
     <section class="faq-section home-faq-section" id="faq" aria-labelledby="faq-title">
       <div class="container faq-layout">
-        <div class="faq-heading"><p class="section-index"><span>09</span> Questions</p><h2 id="faq-title">Before we<br>begin.</h2><p class="faq-intro">Useful details about fit, scope and what comes next.</p></div>
+        <div class="faq-heading"><p class="section-index"><span>07</span> Questions</p><h2 id="faq-title">Before we<br>begin.</h2><p class="faq-intro">Useful details about fit, scope and what comes next.</p></div>
         <div class="faq-list">{{HOME_FAQS}}</div>
       </div>
     </section>
 
     <section class="contact-section home-contact-section" id="contact" data-header-tone="dark" aria-labelledby="contact-title">
       <div class="contact-frame">
-        <p class="contact-index">ZEC&nbsp; / &nbsp;10 — Get in touch</p>
+        <p class="contact-index">ZEC&nbsp; / &nbsp;08 — Get in touch</p>
         <h2 id="contact-title">Have a project<br><em>in mind?</em></h2>
         <div class="final-contact-copy">
           <p>Reply within <strong>{{REPLY_TIME}}</strong>. No work starts until scope is approved.</p>
@@ -199,7 +171,7 @@
             <li>If useful, we can arrange an optional short intro call.</li>
             <li>If we’re a fit, we send a scoped proposal with price and timeline.</li>
           </ol>
-          <div class="final-contact-actions"><a class="contact-cta primary-action" href="{{BASE_PATH}}/start">Tell us what needs to work <span aria-hidden="true">→</span></a>{{FINAL_EMAIL}}</div>
+          <div class="final-contact-actions"><a class="contact-cta" href="{{BASE_PATH}}/start">Tell us what needs to work <span aria-hidden="true">→</span></a>{{FINAL_EMAIL}}</div>
         </div>
       </div>
     </section>
