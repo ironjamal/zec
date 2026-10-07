@@ -114,6 +114,7 @@
         "label": "Sample deliverable",
         "title": "Project brief outline",
         "description": "A neutral example of the questions a brief can settle before scope and timing are agreed.",
+        "metaDescription": "An illustrative project brief outline shows the questions that help define the objective, audience, scope, dependencies and open decisions.",
         "isPlaceholder": false,
         "route": "/samples/project-brief",
         "sections": [
@@ -130,6 +131,7 @@
         "label": "Sample deliverable",
         "title": "Website page map",
         "description": "An illustrative page structure for a small service-business website, not a client project.",
+        "metaDescription": "An illustrative website page map shows one possible structure for a small service business, from home and services to contact.",
         "isPlaceholder": false,
         "route": "/samples/page-map",
         "sections": [

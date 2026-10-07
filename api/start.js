@@ -11,6 +11,46 @@ function cleanText(value, maxLength) {
     : "";
 }
 
+function cleanEnvironmentValue(value) {
+  if (typeof value !== "string") return "";
+  const trimmed = value.trim();
+  const first = trimmed[0];
+  const last = trimmed.at(-1);
+  if (trimmed.length >= 2 && ((first === "\"" && last === "\"") || (first === "'" && last === "'"))) {
+    return trimmed.slice(1, -1).trim();
+  }
+  return trimmed;
+}
+
+function redactProviderError(value, submission, secretKey) {
+  let safe = String(value || "");
+  const privateValues = [...Object.values(submission), secretKey]
+    .filter((item) => typeof item === "string" && item.length > 0)
+    .sort((left, right) => right.length - left.length);
+  for (const privateValue of privateValues) safe = safe.replaceAll(privateValue, "[redacted]");
+  return safe.replace(/[\u0000-\u001f\u007f]/g, " ").slice(0, 600);
+}
+
+async function readSafeSupabaseError(response, submission, secretKey) {
+  let responseBody = "";
+  try {
+    responseBody = await response.text();
+  } catch {
+    return "<unreadable response body>";
+  }
+
+  try {
+    const parsed = JSON.parse(responseBody);
+    const safeFields = {};
+    for (const field of ["code", "message", "hint"]) {
+      if (typeof parsed?.[field] === "string") safeFields[field] = redactProviderError(parsed[field], submission, secretKey);
+    }
+    return JSON.stringify(safeFields).slice(0, 600);
+  } catch {
+    return redactProviderError(responseBody, submission, secretKey);
+  }
+}
+
 function validHttpUrl(value) {
   if (!value) return false;
   try {
@@ -92,25 +132,43 @@ function submissionText(submission) {
   ].join("\n");
 }
 
-async function deliverToWebhook(submission, replyTime, webhookUrl, token) {
-  if (!validHttpUrl(webhookUrl)) return false;
-  const headers = { "Content-Type": "application/json" };
-  if (token) headers.Authorization = `Bearer ${token}`;
-  const response = await fetch(webhookUrl, {
+function supabaseInsertUrl(value) {
+  try {
+    const url = new URL(value);
+    const localHost = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+    if ((!localHost && url.protocol !== "https:") || (localHost && !["http:", "https:"].includes(url.protocol))) return "";
+    if (url.username || url.password || url.search || url.hash || url.pathname.replace(/\/+$/, "")) return "";
+    return new URL("/rest/v1/contact_submissions", url.origin).toString();
+  } catch {
+    return "";
+  }
+}
+
+async function saveToSupabase(submission, endpoint, secretKey) {
+  const row = {
+    project_type: submission.projectType,
+    project_type_label: submission.projectTypeLabel,
+    description: submission.description,
+    name: submission.name,
+    email: submission.email,
+    budget: submission.budget || null,
+    budget_label: submission.budgetLabel || null,
+    business_name: submission.businessName || null,
+    website: submission.website || null,
+    timeline: submission.timeline || null,
+    phone: submission.phone || null
+  };
+  const response = await fetch(endpoint, {
     method: "POST",
-    headers,
-    body: JSON.stringify({
-      event: "zec.contact.submitted",
-      submission,
-      autoReply: {
-        to: submission.email,
-        subject: siteConfig.autoReplyTemplate.subject,
-        text: autoReplyText(replyTime)
-      }
-    }),
+    headers: {
+      apikey: secretKey,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal"
+    },
+    body: JSON.stringify(row),
     signal: AbortSignal.timeout(8000)
   });
-  return response.ok;
+  return response;
 }
 
 async function sendResendEmail(apiKey, from, to, subject, text, replyTo) {
@@ -126,10 +184,11 @@ async function sendResendEmail(apiKey, from, to, subject, text, replyTo) {
 }
 
 async function deliverWithResend(submission, replyTime, env) {
+  const recipient = env.CONTACT_TO_EMAIL || siteConfig.contact.email;
   const notificationSent = await sendResendEmail(
     env.RESEND_API_KEY,
     env.CONTACT_FROM_EMAIL,
-    env.CONTACT_TO_EMAIL,
+    recipient,
     `New project enquiry: ${submission.projectTypeLabel}`,
     submissionText(submission),
     submission.email
@@ -158,7 +217,9 @@ export default async function handler(req, res) {
   if (contentLength > 20000) return res.status(413).json({ error: "The form submission is too large." });
 
   const body = req.body && typeof req.body === "object" && !Array.isArray(req.body) ? req.body : {};
-  if (cleanText(body.company_website_check, 200)) return res.status(202).json({ ok: true });
+  if (cleanText(body.form_guard, 200)) {
+    return res.status(400).json({ error: "The form submission could not be accepted. Please try again or email us." });
+  }
 
   const { errors, value } = validateSubmission(body);
   if (Object.keys(errors).length) return res.status(400).json({ error: "Check the highlighted fields.", fields: errors });
@@ -166,24 +227,38 @@ export default async function handler(req, res) {
   const replyTime = confirmedReplyTime();
   if (!replyTime) return res.status(503).json({ error: "The contact form is not ready yet. Please email us instead." });
 
-  const env = process.env;
-  const webhookConfigured = Boolean(env.CONTACT_WEBHOOK_URL);
-  const resendConfigured = Boolean(env.RESEND_API_KEY && env.CONTACT_TO_EMAIL && env.CONTACT_FROM_EMAIL);
-  if (!webhookConfigured && !resendConfigured) {
+  const endpoint = supabaseInsertUrl(cleanEnvironmentValue(process.env.SUPABASE_URL));
+  const secretKey = cleanEnvironmentValue(process.env.SUPABASE_SECRET_KEY);
+  if (!endpoint || !secretKey) {
     return res.status(503).json({ error: "The contact form is not configured yet. Please email us instead." });
   }
 
   try {
-    const delivered = webhookConfigured
-      ? await deliverToWebhook(value, replyTime, env.CONTACT_WEBHOOK_URL, env.CONTACT_WEBHOOK_TOKEN)
-      : await deliverWithResend(value, replyTime, env);
-    if (!delivered) {
-      console.error("Contact form delivery returned an unsuccessful response.");
-      return res.status(502).json({ error: "We could not send your message. Please try again or email us." });
+    const response = await saveToSupabase(value, endpoint, secretKey);
+    if (!response.ok) {
+      const providerStatus = Number(response.status) || 502;
+      const providerError = await readSafeSupabaseError(response, value, secretKey);
+      console.error(`Contact form save to Supabase returned HTTP ${providerStatus}. Safe response body: ${providerError}`);
+      const error = providerStatus >= 500
+        ? `The form service could not save your enquiry (Supabase HTTP ${providerStatus}). Please try again or email us.`
+        : `The form service rejected your enquiry (Supabase HTTP ${providerStatus}). Please try again or email us.`;
+      return res.status(502).json({ error });
     }
-    return res.status(200).json({ ok: true });
   } catch (error) {
-    console.error("Contact form delivery failed:", error?.message || error);
+    console.error("Contact form save to Supabase failed.", error?.name || "");
     return res.status(502).json({ error: "We could not send your message. Please try again or email us." });
   }
+
+  const env = process.env;
+  if (env.RESEND_API_KEY && env.CONTACT_FROM_EMAIL) {
+    try {
+      const notificationSent = await deliverWithResend(value, replyTime, env);
+      if (!notificationSent) console.error("Contact form was saved, but its email notification failed.");
+    } catch (error) {
+      console.error("Contact form was saved, but its email notification failed.", error?.name || "");
+    }
+  } else if (env.RESEND_API_KEY || env.CONTACT_FROM_EMAIL) {
+    console.error("Contact form was saved, but Resend notification settings are incomplete.");
+  }
+  return res.status(200).json({ ok: true });
 }

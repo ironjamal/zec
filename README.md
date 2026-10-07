@@ -35,15 +35,17 @@ Public contact, pricing, timelines, fit notes, founder/team details and location
 
 `npm run lint` uses Node.js built-ins so the project stays dependency-free. It checks JavaScript and inline-script syntax, parses the JSON data files, and checks CSS comments, strings and block braces. It is a syntax and structure check, not a stylistic ESLint rule set.
 
-The `/start` page posts to the Vercel Function at `/api/start`. The function validates the submission server-side, rejects a filled honeypot, and does not accept submissions until `confirm.REPLY_TIME` has been replaced with a confirmed value.
+The `/start` page posts to the Vercel Function at `/api/start`. The function validates each submission server-side, rejects a filled honeypot, and stores valid enquiries in Supabase. It does not accept submissions until `confirm.REPLY_TIME` has a confirmed value.
 
-Configure one delivery method in the Vercel project environment:
+Apply the SQL migration in `supabase/migrations/` to the Supabase project. In the Vercel project settings, add these required server-side environment variables for Preview and Production:
 
-- **Resend email:** set `RESEND_API_KEY`, `CONTACT_TO_EMAIL` and `CONTACT_FROM_EMAIL`. The endpoint emails the enquiry to `CONTACT_TO_EMAIL` and sends the configured three-step auto-reply to the person who submitted it.
-- **Webhook:** set `CONTACT_WEBHOOK_URL`; optionally set `CONTACT_WEBHOOK_TOKEN` for a bearer token. The webhook receives the enquiry and an `autoReply` object containing the configured subject and message.
+- `SUPABASE_URL` — the project URL from Supabase.
+- `SUPABASE_SECRET_KEY` — a Supabase secret API key. Keep it server-side as a Vercel Secret; do not use a `NEXT_PUBLIC_` prefix or put it in browser code. Supabase secret keys have project-wide elevated access, so create one dedicated to this server endpoint and never commit it.
 
-`.env.example` lists the variable names only. Keep actual values in local ignored environment files or the Vercel environment settings. The public email shown on the site is configured separately as `contact.email` in `data/site-config.json`.
+The migration creates `public.contact_submissions`, enables row-level security, and limits Data API access to inserts by Supabase's server role. Anonymous and authenticated clients cannot read or write submissions. The Data API must be enabled with the `public` schema exposed for the Vercel Function to insert rows.
 
-**TODO for webhook-only delivery:** configure the receiving webhook to send the supplied `autoReply` email. The site includes the template in the webhook payload, but the webhook provider must send it. The Resend delivery option sends the auto-reply directly.
+Email alerts and the visitor auto-reply are optional. To enable them, also set `RESEND_API_KEY` and `CONTACT_FROM_EMAIL` to a verified Resend sender. `CONTACT_TO_EMAIL` can override the recipient; it defaults to the public contact email in `data/site-config.json`. Without Resend settings, submissions are still saved in Supabase, but no email is sent.
+
+`.env.example` lists variable names only. Keep actual values in ignored local environment files or the Vercel environment settings. The public email shown on the site is configured separately as `contact.email` in `data/site-config.json`.
 
 The GitHub Pages build publishes static files only; it cannot run `/api/start`. Use the Vercel deployment to test form submission. The existing GitHub Actions Pages workflow deploys only on pushes to `main`.
