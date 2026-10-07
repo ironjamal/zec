@@ -1059,3 +1059,49 @@ body.motion-ready .reveal-mask.is-visible > img { clip-path: inset(0 0 0 0); tra
 }
 .site-header.is-over-dark:not(.is-on-hero):not(.is-open) .nav-cta.primary-action { border-color: var(--white); background: var(--white); color: var(--ink); }
 .site-header.is-over-dark:not(.is-on-hero):not(.is-open) .nav-cta.primary-action:hover, .site-header.is-over-dark:not(.is-on-hero):not(.is-open) .nav-cta.primary-action:focus-visible { background: transparent; color: var(--white); }
+
+/* Compact the long homepage while preserving the section grid. */
+@media (min-width: 901px) {
+  .who-section, .situations-section, .proof-section, .offers-section, .home-about-section, .homepage-process-section, .home-faq-section, .selected-work-section { padding-block: clamp(2.5rem, 4vw, 3.5rem); }
+  .who-situations-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); align-items: center; gap: clamp(2rem, 4vw, 4rem); }
+  .who-situations-grid .who-layout { grid-template-columns: minmax(0, 1fr); gap: .8rem; align-content: center; }
+  .who-situations-grid .who-copy h2 { max-width: 12ch; font-size: clamp(2.8rem, 4.4vw, 4.6rem); }
+  .who-situations-grid .who-ideal { margin-block: 1rem 1.3rem; font-size: clamp(1rem, 1.35vw, 1.15rem); }
+  .who-situations-grid .who-not-for { grid-template-columns: 1fr; gap: .65rem; }
+  .situations-panel { min-width: 0; padding-left: clamp(1.5rem, 3vw, 3rem); border-left: 1px solid var(--line); }
+  .who-situations-grid .situations-heading { grid-template-columns: 1fr; gap: .8rem; margin-bottom: 1rem; }
+  .who-situations-grid .situations-heading h2 { max-width: 14ch; font-size: clamp(2rem, 3.4vw, 3.2rem); }
+  .who-situations-grid .situation-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .who-situations-grid .situation-card { min-height: 9rem; padding: .9rem; }
+  .who-situations-grid .situation-card h3 { margin: 1rem 0 .6rem; font-size: clamp(1.15rem, 1.7vw, 1.6rem); }
+  .situations-heading, .proof-heading, .offers-heading { margin-bottom: 1.5rem; }
+  .situation-card { min-height: 12rem; }
+  .proof-section .work-samples { margin-bottom: 2rem; }
+  .sample-preview { min-height: 12rem; }
+  .sample-preview-sheet { min-height: 10.5rem; }
+  .selected-work-heading { margin-bottom: 1.5rem; }
+  .selected-work-preview { min-height: clamp(12rem, 14vw, 14rem); }
+  .concept-browser, .concept-page, .concept-dashboard { min-height: 11rem; }
+  .offer-card { min-height: 16rem; }
+  .offer-card h3 { margin-top: 1.2rem; }
+  .process-layout { margin-top: 3rem; }
+  .process-step { min-height: 11svh; padding-block: .55rem; }
+  .process-timing { margin-top: 1.5rem; }
+  .process-notes { margin-top: .5rem; }
+  .homepage-process-section .process-next { margin-top: 1.2rem; }
+  .studio-note { padding-block: 1.5rem; }
+  .faq-item summary { min-height: 3.6rem; padding-block: .55rem; }
+  .home-contact-section .contact-frame { padding-block: 2.75rem; }
+  .home-contact-section .contact-frame h2 { padding-block: 1rem; font-size: clamp(4.2rem, 9vw, 9rem); }
+  .footer-top { min-height: 9rem; padding-block: 1.5rem; }
+}
+
+@media (min-width: 641px) and (max-width: 900px) {
+  .who-section, .situations-section, .proof-section, .offers-section, .home-about-section, .homepage-process-section, .home-faq-section, .selected-work-section { padding-block: 3.5rem; }
+  .situations-heading, .proof-heading, .offers-heading { margin-bottom: 1.6rem; }
+  .situation-card { min-height: 13rem; }
+  .offer-card { min-height: 18rem; }
+  .process-step { min-height: 16svh; padding-block: 1rem; }
+  .home-contact-section .contact-frame { padding-block: 4rem; }
+  .home-contact-section .contact-frame h2 { padding-block: 2rem; }
+}
