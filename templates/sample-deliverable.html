@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#000000">
+  <title>{{TITLE}}</title>
+  <meta name="description" content="{{DESCRIPTION}}">
+  <link rel="canonical" href="{{CANONICAL}}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{TITLE}}">
+  <meta property="og:description" content="{{DESCRIPTION}}">
+  <meta property="og:url" content="{{CANONICAL}}">
+  <meta property="og:image" content="{{OG_IMAGE}}">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{TITLE}}">
+  <meta name="twitter:description" content="{{DESCRIPTION}}">
+  <meta name="twitter:image" content="{{OG_IMAGE}}">
+  <link rel="icon" type="image/png" href="{{BASE_PATH}}/favicon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{BASE_PATH}}/assets/design.css">
+  {{JSONLD}}
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  {{HEADER}}
+  <main id="main" class="sample-page">
+    <section class="sample-hero" aria-labelledby="sample-title">
+      <div class="container">
+        <p class="section-index">{{SAMPLE_LABEL}} / Illustrative example</p>
+        <h1 id="sample-title">{{SAMPLE_TITLE}}</h1>
+        <p class="sample-intro">{{SAMPLE_DESCRIPTION}}</p>
+        <p class="sample-disclaimer">Illustrative sample; not a client project or case study. The actual deliverable is shaped around an agreed project scope.</p>
+      </div>
+    </section>
+    <section class="sample-document" aria-label="Sample deliverable content">
+      <div class="container sample-document-inner">{{SAMPLE_SECTIONS}}</div>
+    </section>
+    <nav class="container sample-actions" aria-label="Sample deliverable links">
+      <a href="{{HOME_URL}}#selected-work">Back to samples</a>
+      {{OTHER_SAMPLES}}
+      <a class="sample-primary-link" href="{{FORM_URL}}">Tell us what needs to work <span aria-hidden="true">→</span></a>
+    </nav>
+  </main>
+  {{FOOTER}}
+  {{SCRIPT}}
+</body>
+</html>

@@ -85,7 +85,7 @@
         <div class="proof-heading">
           <p class="section-index"><span>03</span> Samples</p>
           <h2 id="work-title">Selected work and proof.</h2>
-          <p>These clearly labelled sample slots are placeholders, not client projects.</p>
+          <p>These illustrative deliverables show how project decisions can be organized. They are not client projects.</p>
         </div>
         <div class="work-samples">{{WORK_ITEMS}}</div>
         {{FOUNDER_STRIP}}
@@ -98,7 +98,7 @@
           <p class="section-index"><span>04</span> Offers</p>
           <h2 id="offers-title">Three ways to start.</h2>
           <p>The service pages below each offer explain the work in more detail.</p>
-          <p class="confirm-note">E-commerce placement: <strong>{{ECOMMERCE_OFFER_PLACEMENT}}</strong></p>
+          <p class="confirm-note"><strong>{{ECOMMERCE_OFFER_PLACEMENT}}</strong></p>
         </div>
         <div class="offer-grid">{{HOME_OFFERS}}</div>
       </div>
@@ -111,22 +111,20 @@
       </div>
       <div class="container process-layout">
         <aside class="process-focus" aria-hidden="true">
-          <span class="process-focus-label">Current stage <b id="process-current-number">01 / 06</b></span>
-          <strong id="process-current-title">Discover</strong>
-          <p id="process-current-copy">Understand the business, audience, goals and constraints.</p>
+          <span class="process-focus-label">Current stage <b id="process-current-number">{{PROCESS_CURRENT_NUMBER}}</b></span>
+          <strong id="process-current-title">{{PROCESS_CURRENT_TITLE}}</strong>
+          <p id="process-current-copy">{{PROCESS_CURRENT_COPY}}</p>
           <div class="process-progress"><span id="process-progress-fill"></span></div>
           <span class="process-focus-foot">FROM IDEA / TO DIGITAL PRODUCT</span>
         </aside>
-        <ol class="process-list" id="process-list">
-          <li class="process-step is-active" data-title="Discover" data-copy="Understand the business, audience, goals and constraints."><span>01</span><h3>Discover</h3><p>Understand the business.</p></li>
-          <li class="process-step" data-title="Define" data-copy="Clarify what needs to be built and set the priorities."><span>02</span><h3>Define</h3><p>Set the product and its priorities.</p></li>
-          <li class="process-step" data-title="Design" data-copy="Shape the structure, visual system and experience."><span>03</span><h3>Design</h3><p>Create the experience.</p></li>
-          <li class="process-step" data-title="Build" data-copy="Develop the product with its design and real use in mind."><span>04</span><h3>Build</h3><p>Develop the product.</p></li>
-          <li class="process-step" data-title="Test" data-copy="Refine the details across devices and important user paths."><span>05</span><h3>Test</h3><p>Refine the experience.</p></li>
-          <li class="process-step" data-title="Launch" data-copy="Deliver the product and agree on what should happen next."><span>06</span><h3>Launch</h3><p>Deliver and move forward.</p></li>
-        </ol>
+        <ol class="process-list" id="process-list">{{PROCESS_STEPS}}</ol>
       </div>
-      <div class="container process-next"><p>No work starts until scope is approved.</p><a href="#sample-brief">See a sample brief <span aria-hidden="true">↓</span></a></div>
+      <div class="container process-timing">
+        <div class="process-timing-heading"><p class="section-index">Planning</p><h3>Typical timelines.</h3><p>Timing is confirmed once the scope and review points are agreed.</p></div>
+        <ul class="process-timeline-list">{{PROCESS_TIMELINES}}</ul>
+      </div>
+      <div class="container process-notes">{{PROCESS_NOTES}}</div>
+      <div class="container process-next"><p>No work starts until scope is approved.</p><a href="{{SAMPLE_BRIEF_URL}}">See a sample brief <span aria-hidden="true">→</span></a></div>
     </section>
 
     <section class="about-section home-about-section" id="about" aria-labelledby="about-title">
@@ -135,7 +133,7 @@
         <div class="about-content">
           <div>
             <h2 id="about-title">Business.<br>Design.<br>Technology.</h2>
-            <p class="about-intro">ZEC is an independent digital studio. The details below identify who carries out the work; placeholders stay visible until confirmed.</p>
+            <p class="about-intro">{{ABOUT_INTRO}}</p>
           </div>
           <div class="about-side about-people">
             <p><span>Founder</span><strong>{{FOUNDER_NAME}}</strong></p>

@@ -32,10 +32,13 @@ for (const service of services) {
   if (!Array.isArray(service.related) || service.related.length !== 2 || service.related.some((slug) => !serviceBySlug.has(slug))) throw new Error(`${service.name} must reference two existing related services.`);
 }
 const homepageOffers = siteConfig.homepage?.offers || [];
+const publishedSampleDeliverables = (siteConfig.confirm?.WORK_ITEMS || []).filter((item) => item.isPlaceholder !== true && item.route);
 const groupedServiceSlugs = homepageOffers.flatMap((offer) => offer.serviceSlugs || []);
 if (homepageOffers.length !== 3) throw new Error("The homepage must define exactly three offers.");
 if (new Set(homepageOffers.map((offer) => offer.id)).size !== homepageOffers.length || homepageOffers.some((offer) => !/^[a-z0-9-]+$/.test(offer.id))) throw new Error("Offer IDs must be unique lowercase slugs.");
 if (groupedServiceSlugs.length !== services.length || new Set(groupedServiceSlugs).size !== services.length || services.some((service) => !groupedServiceSlugs.includes(service.slug))) throw new Error("The three offers must group every service page exactly once.");
+if (!Array.isArray(siteConfig.homepage?.processStages) || siteConfig.homepage.processStages.length !== 6) throw new Error("The homepage must define six process stages.");
+if (new Set(publishedSampleDeliverables.map((item) => item.route)).size !== publishedSampleDeliverables.length || publishedSampleDeliverables.some((item) => !/^\/samples\/[a-z0-9-]+$/.test(item.route) || !Array.isArray(item.sections) || item.sections.length < 2)) throw new Error("Published sample deliverables need unique sample routes and at least two content sections.");
 
 function escapeHtml(value = "") {
   return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#39;");
@@ -93,7 +96,8 @@ function normalizeUrl(value) {
 function contactLinks(className = "contact-links") {
   const links = [];
   const number = siteConfig.contact?.whatsappNumber || "";
-  const digits = String(number).replace(/\D/g, "");
+  let digits = String(number).replace(/\D/g, "");
+  if (/^0\d{10}$/.test(digits)) digits = `20${digits.slice(1)}`;
   const whatsappUrl = normalizeUrl(number) || (isSet(number) && digits.length >= 8 ? `https://wa.me/${digits}` : "");
   if (siteConfig.contact?.whatsappEnabled && whatsappUrl) links.push(`<a href="${escapeHtml(whatsappUrl)}" target="_blank" rel="noopener noreferrer">WhatsApp <span aria-hidden="true">↗</span></a>`);
   const email = siteConfig.contact?.email || "";
@@ -146,7 +150,8 @@ function serviceOfferGroups() {
       if (!service) throw new Error(`Offer ${offer.title} references unknown service ${slug}.`);
       return `<a class="service-depth-link" href="${sitePath(`/services/${service.slug}`)}"><span class="service-no">${service.number}</span><span><strong>${escapeHtml(service.name)}</strong><small>${escapeHtml(service.summary)}</small></span><span class="service-arrow" aria-hidden="true">→</span></a>`;
     }).join("");
-    const placement = offer.id === "websites-stores" ? `<p class="service-placement-note">E-commerce placement: ${escapeHtml(siteConfig.confirm.ECOMMERCE_OFFER_PLACEMENT)}</p>` : "";
+    const ecommercePlacement = siteConfig.confirm.ECOMMERCE_OFFER_PLACEMENT === "Core service" ? "E-commerce is a core service within Websites & stores." : `E-commerce placement: ${siteConfig.confirm.ECOMMERCE_OFFER_PLACEMENT}`;
+    const placement = offer.id === "websites-stores" ? `<p class="service-placement-note">${escapeHtml(ecommercePlacement)}</p>` : "";
     return `<section class="service-offer-group" aria-labelledby="service-offer-${escapeHtml(offer.id)}"><div><h3 id="service-offer-${escapeHtml(offer.id)}">${escapeHtml(offer.title)}</h3><p>${escapeHtml(offer.description)}</p>${placement}</div><div class="service-depth-links">${serviceLinks}</div></section>`;
   }).join("\n");
 }
@@ -171,8 +176,33 @@ function renderHomeWork() {
   const items = siteConfig.confirm?.WORK_ITEMS || [];
   return items.map((item) => {
     const id = /^[a-z0-9-]+$/.test(item.id || "") ? ` id="${escapeHtml(item.id)}"` : "";
-    return `<article class="work-sample"${id}><p class="work-sample-label">${escapeHtml(item.label)}</p><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p></article>`;
+    const previewLink = item.route ? `<a class="work-sample-link" href="${escapeHtml(sitePath(item.route))}">Read the sample <span aria-hidden="true">→</span></a>` : "";
+    return `<article class="work-sample"${id}><p class="work-sample-label">${escapeHtml(item.label)}</p><h3>${escapeHtml(item.title)}</h3><p>${escapeHtml(item.description)}</p>${previewLink}</article>`;
   }).join("");
+}
+
+function renderProcessStages() {
+  const stages = siteConfig.homepage.processStages;
+  return stages.map((stage, index) => `<li class="process-step${index === 0 ? " is-active" : ""}" data-title="${escapeHtml(stage.name)}" data-copy="${escapeHtml(stage.description)}"><span>${String(index + 1).padStart(2, "0")}</span><h3>${escapeHtml(stage.name)}</h3><p>${escapeHtml(stage.description)}</p><p class="process-step-output"><span>Output</span>${escapeHtml(stage.output)}</p></li>`).join("\n");
+}
+
+function timelineLabel(type) {
+  const labels = { landing_page: "Landing page", business_website: "Business website", web_app: "Web app" };
+  return labels[type] || type.replaceAll("_", " ");
+}
+
+function renderProcessTimelines() {
+  const ranges = siteConfig.confirm.TIMELINE_RANGES;
+  const entries = typeof ranges === "string" ? [["Project", ranges]] : Object.entries(ranges || {});
+  return entries.map(([type, range]) => `<li class="process-timeline"><span>${escapeHtml(timelineLabel(type))}</span><strong>${escapeHtml(range)}</strong></li>`).join("\n");
+}
+
+function renderProcessNotes() {
+  return (siteConfig.homepage.processNotes || []).map((note) => `<section class="process-note"><h3>${escapeHtml(note.title)}</h3><p>${escapeHtml(note.text)}</p></section>`).join("\n");
+}
+
+function renderSampleSections(sections) {
+  return sections.map((section, index) => `<article class="sample-document-part"><span>${String(index + 1).padStart(2, "0")}</span><div><h2>${escapeHtml(section.heading)}</h2><p>${escapeHtml(section.text)}</p></div></article>`).join("\n");
 }
 
 function founderPortrait(person) {
@@ -193,9 +223,15 @@ function renderEmailCta() {
 }
 
 function renderHomeFaqs() {
+  const timelineRanges = typeof siteConfig.confirm.TIMELINE_RANGES === "string"
+    ? siteConfig.confirm.TIMELINE_RANGES
+    : Object.entries(siteConfig.confirm.TIMELINE_RANGES || {}).map(([type, range]) => {
+      const labels = { landing_page: "Landing page", business_website: "Business website", web_app: "Web app" };
+      return `${labels[type] || type}: ${range}`;
+    }).join("; ");
   const replacements = {
     PRICE_FLOOR: siteConfig.confirm.PRICE_FLOOR,
-    TIMELINE_RANGES: siteConfig.confirm.TIMELINE_RANGES,
+    TIMELINE_RANGES: timelineRanges,
     IDEAL_CLIENT: siteConfig.homepage.idealClient,
     NOT_FOR: siteConfig.confirm.NOT_FOR.join(", "),
     LOCATION_TIMEZONE: siteConfig.confirm.LOCATION_TIMEZONE
@@ -233,14 +269,22 @@ function renderHome(homeTemplate, header, footer, script) {
     FOOTER: footer,
     SCRIPT: script,
     FORM_URL: escapeHtml(formUrl),
+    SAMPLE_BRIEF_URL: escapeHtml(sitePath("/samples/project-brief")),
+    ABOUT_INTRO: escapeHtml(siteConfig.homepage.aboutIntro),
+    PROCESS_CURRENT_NUMBER: `01 / ${String(siteConfig.homepage.processStages.length).padStart(2, "0")}`,
     REPLY_TIME: escapeHtml(siteConfig.confirm.REPLY_TIME),
     IDEAL_CLIENT: escapeHtml(siteConfig.homepage.idealClient),
     NOT_FOR_ITEMS: siteConfig.confirm.NOT_FOR.map((item) => `<li${item.includes("[CONFIRM:") ? " class=\"is-confirm\"" : ""}>${escapeHtml(item)}</li>`).join(""),
     SITUATIONS: renderSituations(),
     WORK_ITEMS: renderHomeWork(),
     FOUNDER_STRIP: renderFounderStrip(),
-    ECOMMERCE_OFFER_PLACEMENT: escapeHtml(siteConfig.confirm.ECOMMERCE_OFFER_PLACEMENT),
+    ECOMMERCE_OFFER_PLACEMENT: escapeHtml(siteConfig.confirm.ECOMMERCE_OFFER_PLACEMENT === "Core service" ? "E-commerce is a core service." : siteConfig.confirm.ECOMMERCE_OFFER_PLACEMENT),
     HOME_OFFERS: renderOfferCards(),
+    PROCESS_CURRENT_TITLE: escapeHtml(siteConfig.homepage.processStages[0].name),
+    PROCESS_CURRENT_COPY: escapeHtml(siteConfig.homepage.processStages[0].description),
+    PROCESS_STEPS: renderProcessStages(),
+    PROCESS_TIMELINES: renderProcessTimelines(),
+    PROCESS_NOTES: renderProcessNotes(),
     FOUNDER_NAME: escapeHtml(siteConfig.confirm.FOUNDER.name),
     FOUNDER_ROLE: escapeHtml(siteConfig.confirm.FOUNDER.role),
     TEAM_STRUCTURE: escapeHtml(siteConfig.confirm.TEAM_STRUCTURE),
@@ -248,6 +292,31 @@ function renderHome(homeTemplate, header, footer, script) {
     EMAIL_CTA: renderEmailCta(),
     HOME_FAQS: renderHomeFaqs(),
     FINAL_EMAIL: publicEmailMarkup()
+  });
+}
+
+function renderSampleDeliverable(item, template, header, footer, script) {
+  const canonical = absoluteSiteUrl(item.route);
+  const title = `${item.title} — Sample deliverable | ZEC`;
+  const description = item.description;
+  const otherSamples = publishedSampleDeliverables
+    .filter((other) => other.route !== item.route)
+    .map((other) => `<a href="${escapeHtml(sitePath(other.route))}">View ${escapeHtml(other.title)}</a>`)
+    .join("");
+  const pageSchema = { "@context": "https://schema.org", "@type": "CreativeWork", name: title, url: canonical, description };
+  return fill(template, {
+    ...pageHead({ title, description, canonical, jsonLdContent: jsonLd(pageSchema) }),
+    BASE_PATH: escapeHtml(BASE_PATH),
+    HEADER: header,
+    FOOTER: footer,
+    SCRIPT: script,
+    SAMPLE_LABEL: escapeHtml(item.label),
+    SAMPLE_TITLE: escapeHtml(item.title),
+    SAMPLE_DESCRIPTION: escapeHtml(item.description),
+    SAMPLE_SECTIONS: renderSampleSections(item.sections),
+    HOME_URL: escapeHtml(sitePath("/")),
+    FORM_URL: escapeHtml(formUrl),
+    OTHER_SAMPLES: otherSamples
   });
 }
 
@@ -369,6 +438,7 @@ const homeTemplate = fs.readFileSync(path.join(templateDir, "home.html"), "utf8"
 const serviceTemplate = fs.readFileSync(path.join(templateDir, "service.html"), "utf8");
 const hubTemplate = fs.readFileSync(path.join(templateDir, "services-index.html"), "utf8");
 const startTemplate = fs.readFileSync(path.join(templateDir, "start.html"), "utf8");
+const sampleTemplate = fs.readFileSync(path.join(templateDir, "sample-deliverable.html"), "utf8");
 const header = renderHeader(headerTemplate);
 const footer = renderFooter(footerTemplate);
 
@@ -382,6 +452,7 @@ write(pageOutputPath("/"), renderHome(homeTemplate, header, footer, scriptTempla
 write(pageOutputPath("/services"), renderHub(hubTemplate, header, footer, scriptTemplate));
 write(pageOutputPath("/start"), renderStart(startTemplate, header, footer, scriptTemplate));
 for (const service of services) write(pageOutputPath(`/services/${service.slug}`), renderService(service, serviceTemplate, header, footer, scriptTemplate));
+for (const item of publishedSampleDeliverables) write(pageOutputPath(item.route), renderSampleDeliverable(item, sampleTemplate, header, footer, scriptTemplate));
 write("404.html", fill(fs.readFileSync(path.join(templateDir, "404.html"), "utf8"), {
   BASE_PATH: escapeHtml(BASE_PATH),
   HOME_URL: sitePath("/"),
@@ -392,10 +463,10 @@ write("404.html", fill(fs.readFileSync(path.join(templateDir, "404.html"), "utf8
   FORM_URL: escapeHtml(formUrl)
 }));
 
-const sitemapRoutes = ["/", "/services", "/start", ...services.map((service) => `/services/${service.slug}`)];
+const sitemapRoutes = ["/", "/services", "/start", ...services.map((service) => `/services/${service.slug}`), ...publishedSampleDeliverables.map((item) => item.route)];
 const sitemapUrls = sitemapRoutes.map(absoluteSiteUrl);
 write("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemapUrls.map((url) => `  <url><loc>${escapeHtml(url)}</loc></url>`).join("\n")}\n</urlset>\n`);
 write("robots.txt", `User-agent: *\nAllow: ${BASE_PATH || "/"}/\nSitemap: ${SITE_URL}/sitemap.xml\n`);
 if (target === "github-pages") write(".nojekyll", "");
 
-console.log(`Built ${target} output at ${outputDir}: homepage, start form, service directory and ${services.length} service pages (BASE_PATH=${BASE_PATH || "(empty)"}, SITE_URL=${SITE_URL}).`);
+console.log(`Built ${target} output at ${outputDir}: homepage, start form, service directory, ${services.length} service pages and ${publishedSampleDeliverables.length} sample previews (BASE_PATH=${BASE_PATH || "(empty)"}, SITE_URL=${SITE_URL}).`);

@@ -6,6 +6,8 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 const outputRoot = path.join(repoRoot, "dist");
 const services = JSON.parse(fs.readFileSync(path.join(repoRoot, "data", "services.json"), "utf8"));
 const siteConfig = JSON.parse(fs.readFileSync(path.join(repoRoot, "data", "site-config.json"), "utf8"));
+const sampleItems = siteConfig.confirm?.WORK_ITEMS || [];
+const sampleRoutes = sampleItems.filter((item) => item.isPlaceholder !== true && item.route).map((item) => item.route);
 const targetIndex = process.argv.indexOf("--target");
 const target = process.env.BUILD_TARGET || (targetIndex >= 0 ? process.argv[targetIndex + 1] : "vercel");
 const targetConfig = siteConfig.targets?.[target];
@@ -19,7 +21,9 @@ const sitePathname = new URL(siteUrl).pathname.replace(/\/$/, "");
 const errors = [];
 const titles = new Set();
 const canonicalUrls = new Set();
-const routes = ["/", "/services", "/start", ...services.map((service) => `/services/${service.slug}`)];
+const routes = ["/", "/services", "/start", ...services.map((service) => `/services/${service.slug}`), ...sampleRoutes];
+const homepageOffers = siteConfig.homepage?.offers || [];
+const projectTypeValues = new Set((siteConfig.projectTypes || []).map((item) => item.value));
 
 if (sitePathname !== basePrefix) errors.push(`SITE_URL path (${sitePathname || "(empty)"}) does not match BASE_PATH (${basePrefix || "(empty)"}).`);
 
@@ -111,9 +115,29 @@ for (const page of pages) {
     if ((homeMain.match(/class="offer-card"/g) || []).length !== 3) errors.push("Homepage must render exactly three offer cards.");
     if ((homeMain.match(/class="faq-item"/g) || []).length !== 7) errors.push("Homepage must render seven FAQs.");
     if ((homeMain.match(/class="work-sample"/g) || []).length < 2) errors.push("Homepage must render at least two labelled work or sample items.");
+    if ((homeMain.match(/class="process-step-output"/g) || []).length !== 6) errors.push("Homepage must show one output for each process stage.");
+    if ((homeMain.match(/class="process-timeline"/g) || []).length < 3) errors.push("Homepage must show the confirmed typical project timelines.");
+    if (!homeMain.includes(siteConfig.homepage.aboutIntro)) errors.push("Homepage is missing the configured About introduction.");
+    for (const offer of homepageOffers) {
+      const offerType = siteConfig.projectTypeAliases?.[offer.projectType] || offer.projectType;
+      const offerUrl = `${basePrefix}/start?type=${encodeURIComponent(offer.projectType)}`;
+      if (!projectTypeValues.has(offerType)) errors.push(`Offer ${offer.id} does not map to a valid project type.`);
+      if (!html.includes(`href="${offerUrl}"`)) errors.push(`Offer ${offer.id} is missing its /start?type= deep link.`);
+    }
     if (!html.includes(`${basePrefix}/assets/zec-architecture-break.webp`) || !html.includes(`${basePrefix}/assets/zec-hero-architecture.webp`)) errors.push("Homepage must keep the existing desktop and mobile hero photos.");
     if (/class="(?:visual-break|manifesto-section|capabilities-section|solutions-section)"/.test(homeMain)) errors.push("Homepage still contains a section removed by the nine-section redesign.");
-    if (!primaryNav.includes("Samples")) errors.push("Homepage navigation should say Samples while its work items are placeholders.");
+    const hasPublishedWork = sampleItems.filter((item) => item.isPlaceholder !== true && item.label && item.title).length >= 2;
+    if (hasPublishedWork ? !primaryNav.includes("Work") : !primaryNav.includes("Samples")) errors.push("Homepage Work/Samples navigation label does not match the configured proof items.");
+  }
+  if (page.route.startsWith("/samples/")) {
+    if (!/class="sample-page"/.test(html)) errors.push(`Sample route is missing its sample page content: ${page.route}`);
+    if (!html.includes("Illustrative sample; not a client project or case study.")) errors.push(`Sample route is missing its non-client disclaimer: ${page.route}`);
+    if ((html.match(/class="sample-document-part"/g) || []).length < 2) errors.push(`Sample route needs at least two preview sections: ${page.route}`);
+  }
+  if (page.route === "/services/websites") {
+    const websiteIntro = services.find((service) => service.slug === "websites")?.intro || "";
+    const serviceMain = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] || "";
+    if (websiteIntro && serviceMain.split(websiteIntro).length - 1 !== 1) errors.push("The Websites page repeats its introductory paragraph.");
   }
   if (page.route === "/services") {
     if ((html.match(/class="service-offer-group"/g) || []).length !== 3) errors.push("Services page must group depth pages under three offers.");
@@ -125,6 +149,7 @@ for (const page of pages) {
     const requiredFields = html.match(/<(?:input|select|textarea)\b[^>]*\brequired(?:\s|>|=)/gi) || [];
     if (requiredFields.length > 5) errors.push(`Start page has more than five required form fields (${requiredFields.length}).`);
     if (!/aria-live="polite"/.test(html) || !/id="start-confirmation"/.test(html)) errors.push("Start page is missing its accessible confirmation panel.");
+    if (!/new URLSearchParams\(window\.location\.search\)\.get\("type"\)/.test(html) || !/aliases\[queryType\.toLowerCase\(\)\]/.test(html)) errors.push("Start page is missing offer type preselection from its query string.");
   }
 
   const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]));
