@@ -175,7 +175,7 @@ for (const page of pages) {
     if (!/<form\b[^>]*id="start-form"/i.test(html)) errors.push("Start page is missing its project enquiry form.");
     if (!/name="form_guard"/.test(html)) errors.push("Start page is missing its spam honeypot field.");
     if (target === "vercel" && !/<form\b[^>]*action="\/api\/start"[^>]*data-endpoint="\/api\/start"/.test(html)) errors.push("Vercel start form must post to the relative /api/start function route.");
-    for (const field of ["projectType", "description", "budget", "name", "email", "businessName", "website", "timeline", "phone", "form_guard"]) {
+    for (const field of ["projectType", "description", "budget", "name", "email", "businessName", "website", "timeline", "clientNumber", "form_guard"]) {
       if (!new RegExp(`name="${field}"`).test(html)) errors.push(`Start page is missing the ${field} submission field.`);
     }
     const requiredFields = html.match(/<(?:input|select|textarea)\b[^>]*\brequired(?:\s|>|=)/gi) || [];

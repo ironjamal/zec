@@ -74,6 +74,9 @@
               </div>
             </div>
 
+            <label class="field-label" for="client-number">Client phone / WhatsApp number <span>Required</span></label>
+            <input id="client-number" name="clientNumber" type="tel" autocomplete="tel" maxlength="80" required>
+
             <details class="optional-fields">
               <summary>Add optional details</summary>
               <div class="optional-fields-body">
@@ -83,8 +86,6 @@
                 <input id="website" name="website" type="url" autocomplete="url" maxlength="2048" placeholder="https://example.com">
                 <label class="field-label" for="timeline">Timeline <span>Optional</span></label>
                 <input id="timeline" name="timeline" type="text" maxlength="160" placeholder="A date or a rough range is fine">
-                <label class="field-label" for="phone">Phone or WhatsApp <span>Optional</span></label>
-                <input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="80">
               </div>
             </details>
 
