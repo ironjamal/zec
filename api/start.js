@@ -1,4 +1,9 @@
 import { createRequire } from "node:module";
+import {
+  appendContactSubmission,
+  GoogleSheetsConfigurationError,
+  GoogleSheetsProviderError
+} from "../lib/google-sheets.js";
 
 const require = createRequire(import.meta.url);
 const siteConfig = require("../data/site-config.json");
@@ -9,46 +14,6 @@ function cleanText(value, maxLength) {
   return typeof value === "string"
     ? value.replace(/\0/g, "").replace(/\r\n?/g, "\n").trim().slice(0, maxLength)
     : "";
-}
-
-function cleanEnvironmentValue(value) {
-  if (typeof value !== "string") return "";
-  const trimmed = value.trim();
-  const first = trimmed[0];
-  const last = trimmed.at(-1);
-  if (trimmed.length >= 2 && ((first === "\"" && last === "\"") || (first === "'" && last === "'"))) {
-    return trimmed.slice(1, -1).trim();
-  }
-  return trimmed;
-}
-
-function redactProviderError(value, submission, secretKey) {
-  let safe = String(value || "");
-  const privateValues = [...Object.values(submission), secretKey]
-    .filter((item) => typeof item === "string" && item.length > 0)
-    .sort((left, right) => right.length - left.length);
-  for (const privateValue of privateValues) safe = safe.replaceAll(privateValue, "[redacted]");
-  return safe.replace(/[\u0000-\u001f\u007f]/g, " ").slice(0, 600);
-}
-
-async function readSafeSupabaseError(response, submission, secretKey) {
-  let responseBody = "";
-  try {
-    responseBody = await response.text();
-  } catch {
-    return "<unreadable response body>";
-  }
-
-  try {
-    const parsed = JSON.parse(responseBody);
-    const safeFields = {};
-    for (const field of ["code", "message", "hint"]) {
-      if (typeof parsed?.[field] === "string") safeFields[field] = redactProviderError(parsed[field], submission, secretKey);
-    }
-    return JSON.stringify(safeFields).slice(0, 600);
-  } catch {
-    return redactProviderError(responseBody, submission, secretKey);
-  }
 }
 
 function validHttpUrl(value) {
@@ -71,12 +36,13 @@ export function validateSubmission(body) {
   const businessName = cleanText(input.businessName, 160);
   const website = cleanText(input.website, 2048);
   const timeline = cleanText(input.timeline, 160);
-  const phone = cleanText(input.phone, 80);
+  const clientNumber = cleanText(input.clientNumber ?? input.phone, 80);
 
   if (!projectTypes.has(projectType)) errors.projectType = "Choose one of the listed project types.";
   if (description.length < 10) errors.description = "Add a little more detail about what needs to work.";
   if (!name) errors.name = "Enter your name.";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errors.email = "Enter a valid email address.";
+  if (!clientNumber) errors.clientNumber = "Enter your phone or WhatsApp number.";
   if (budget && !budgetValues.has(budget)) errors.budget = "Choose one of the listed budget options.";
   if (website && !validHttpUrl(website)) errors.website = "Enter a full website address, including https://.";
 
@@ -93,7 +59,7 @@ export function validateSubmission(body) {
       businessName,
       website,
       timeline,
-      phone
+      clientNumber
     }
   };
 }
@@ -125,50 +91,11 @@ function submissionText(submission) {
     `Business: ${submission.businessName || "Not provided"}`,
     `Website: ${submission.website || "Not provided"}`,
     `Timeline: ${submission.timeline || "Not provided"}`,
-    `Phone: ${submission.phone || "Not provided"}`,
+    `Client number: ${submission.clientNumber}`,
     "",
     "What needs to work:",
     submission.description
   ].join("\n");
-}
-
-function supabaseInsertUrl(value) {
-  try {
-    const url = new URL(value);
-    const localHost = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
-    if ((!localHost && url.protocol !== "https:") || (localHost && !["http:", "https:"].includes(url.protocol))) return "";
-    if (url.username || url.password || url.search || url.hash || url.pathname.replace(/\/+$/, "")) return "";
-    return new URL("/rest/v1/contact_submissions", url.origin).toString();
-  } catch {
-    return "";
-  }
-}
-
-async function saveToSupabase(submission, endpoint, secretKey) {
-  const row = {
-    project_type: submission.projectType,
-    project_type_label: submission.projectTypeLabel,
-    description: submission.description,
-    name: submission.name,
-    email: submission.email,
-    budget: submission.budget || null,
-    budget_label: submission.budgetLabel || null,
-    business_name: submission.businessName || null,
-    website: submission.website || null,
-    timeline: submission.timeline || null,
-    phone: submission.phone || null
-  };
-  const response = await fetch(endpoint, {
-    method: "POST",
-    headers: {
-      apikey: secretKey,
-      "Content-Type": "application/json",
-      Prefer: "return=minimal"
-    },
-    body: JSON.stringify(row),
-    signal: AbortSignal.timeout(8000)
-  });
-  return response;
 }
 
 async function sendResendEmail(apiKey, from, to, subject, text, replyTo) {
@@ -227,26 +154,21 @@ export default async function handler(req, res) {
   const replyTime = confirmedReplyTime();
   if (!replyTime) return res.status(503).json({ error: "The contact form is not ready yet. Please email us instead." });
 
-  const endpoint = supabaseInsertUrl(cleanEnvironmentValue(process.env.SUPABASE_URL));
-  const secretKey = cleanEnvironmentValue(process.env.SUPABASE_SECRET_KEY);
-  if (!endpoint || !secretKey) {
-    return res.status(503).json({ error: "The contact form is not configured yet. Please email us instead." });
-  }
-
   try {
-    const response = await saveToSupabase(value, endpoint, secretKey);
-    if (!response.ok) {
-      const providerStatus = Number(response.status) || 502;
-      const providerError = await readSafeSupabaseError(response, value, secretKey);
-      console.error(`Contact form save to Supabase returned HTTP ${providerStatus}. Safe response body: ${providerError}`);
-      const error = providerStatus >= 500
-        ? `The form service could not save your enquiry (Supabase HTTP ${providerStatus}). Please try again or email us.`
-        : `The form service rejected your enquiry (Supabase HTTP ${providerStatus}). Please try again or email us.`;
-      return res.status(502).json({ error });
-    }
+    await appendContactSubmission(value);
   } catch (error) {
-    console.error("Contact form save to Supabase failed.", error?.name || "");
-    return res.status(502).json({ error: "We could not send your message. Please try again or email us." });
+    if (error instanceof GoogleSheetsConfigurationError) {
+      return res.status(503).json({ error: "The contact form is not configured yet. Please email us instead." });
+    }
+    if (error instanceof GoogleSheetsProviderError) {
+      console.error(`Contact form save to Google Sheets failed during ${error.stage} with HTTP ${error.status}. Safe response body: ${error.safeBody}`);
+      const message = error.status >= 500
+        ? `The form service could not save your enquiry (Google Sheets HTTP ${error.status}). Please try again or email us.`
+        : `The form service rejected your enquiry (Google Sheets HTTP ${error.status}). Please try again or email us.`;
+      return res.status(502).json({ error: message });
+    }
+    console.error("Contact form save to Google Sheets failed.", error?.name || "");
+    return res.status(502).json({ error: "We could not save your message. Please try again or email us." });
   }
 
   const env = process.env;

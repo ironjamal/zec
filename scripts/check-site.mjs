@@ -124,12 +124,16 @@ for (const page of pages) {
   if (page.route === "/") {
     const homeMain = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] || "";
     const homeSections = [...homeMain.matchAll(/<section\b[^>]*\bid="([^"]+)"/gi)].map((match) => match[1]);
-    const expectedSections = ["top", "who-for", "situations", "selected-work", "offers", "process", "about", "faq", "contact"];
+    const expectedSections = ["top", "who-for", "samples", "selected-work", "offers", "process", "about", "faq", "contact"];
     if (JSON.stringify(homeSections) !== JSON.stringify(expectedSections)) errors.push(`Homepage sections do not match the required nine-section order: ${homeSections.join(", ")}`);
     if ((homeMain.match(/class="situation-card"/g) || []).length !== 4) errors.push("Homepage must render four situation cards.");
     if ((homeMain.match(/class="offer-card"/g) || []).length !== 3) errors.push("Homepage must render exactly three offer cards.");
     if ((homeMain.match(/class="faq-item"/g) || []).length !== 7) errors.push("Homepage must render seven FAQs.");
     if ((homeMain.match(/class="work-sample"/g) || []).length < 2) errors.push("Homepage must render at least two labelled work or sample items.");
+    if ((homeMain.match(/class="sample-preview"/g) || []).length < 2) errors.push("Homepage samples need rendered document previews.");
+    if ((homeMain.match(/class="selected-work-card"/g) || []).length !== 3 || (homeMain.match(/Concept work/g) || []).length < 3) errors.push("Homepage must render three clearly labelled concept work cards.");
+    if (!homeMain.includes("Clear scope.<br>Useful handover.") || !homeMain.includes("id=\"studio-note\"")) errors.push("Homepage is missing the studio trust strip between Process and FAQ.");
+    if (!homeMain.includes("Projects start from 8,000 EGP") || homeMain.includes("Projects start from Projects start from")) errors.push("Homepage project minimum must appear once in the FAQ.");
     if ((homeMain.match(/class="process-step-output"/g) || []).length !== 6) errors.push("Homepage must show one output for each process stage.");
     if ((homeMain.match(/class="process-timeline"/g) || []).length < 3) errors.push("Homepage must show the confirmed typical project timelines.");
     if (!homeMain.includes(siteConfig.homepage.aboutIntro)) errors.push("Homepage is missing the configured About introduction.");
@@ -145,7 +149,9 @@ for (const page of pages) {
     if (hasPublishedWork ? !primaryNav.includes("Work") : !primaryNav.includes("Samples")) errors.push("Homepage Work/Samples navigation label does not match the configured proof items.");
     const numbers = [...homeMain.matchAll(/class="section-index[^"]*"[^>]*>\s*<span>(\d{2})<\/span>/g)].map((match) => match[1]);
     const contactNumber = homeMain.match(/class="contact-index[^"]*"[^>]*>[\s\S]*?(\d{2})\s*—/i)?.[1] || "";
-    if (numbers.join(",") !== "01,02,03,04,05,06,07" || contactNumber !== "08") errors.push("Homepage section numbers must run from 01 through 08 in page order.");
+    if (numbers.join(",") !== "01,02,03,04,05,06,07,08,09" || contactNumber !== "10") errors.push("Homepage section numbers must run from 01 through 10 in page order.");
+    if (!html.includes("01/06") || !html.includes("threshold: [0, 0.6, 0.75, 1]") || !html.includes("process-focus-copy")) errors.push("Homepage process interaction must expose stage progress and use a 0.6 visibility threshold.");
+    if (!html.includes("a[href*='#']") || !html.includes("new URL(link.href, window.location.href).hash === \"#\" + active.target.id") || !html.includes("setAttribute(\"aria-current\", \"location\")")) errors.push("Homepage navigation must apply scroll-spy state to same-page sections.");
   }
   if (page.route.startsWith("/samples/")) {
     if (!/class="sample-page"/.test(html)) errors.push(`Sample route is missing its sample page content: ${page.route}`);
@@ -175,7 +181,7 @@ for (const page of pages) {
     if (!/<form\b[^>]*id="start-form"/i.test(html)) errors.push("Start page is missing its project enquiry form.");
     if (!/name="form_guard"/.test(html)) errors.push("Start page is missing its spam honeypot field.");
     if (target === "vercel" && !/<form\b[^>]*action="\/api\/start"[^>]*data-endpoint="\/api\/start"/.test(html)) errors.push("Vercel start form must post to the relative /api/start function route.");
-    for (const field of ["projectType", "description", "budget", "name", "email", "businessName", "website", "timeline", "phone", "form_guard"]) {
+    for (const field of ["projectType", "description", "budget", "name", "email", "businessName", "website", "timeline", "clientNumber", "form_guard"]) {
       if (!new RegExp(`name="${field}"`).test(html)) errors.push(`Start page is missing the ${field} submission field.`);
     }
     const requiredFields = html.match(/<(?:input|select|textarea)\b[^>]*\brequired(?:\s|>|=)/gi) || [];
@@ -253,7 +259,7 @@ if (sitemapUrls.length !== pages.length || pages.some((page) => !sitemapUrls.inc
 if (sitemapUrls.some((url) => !url.startsWith(`${siteUrl}/`))) errors.push("Sitemap URL escapes SITE_URL.");
 const robotsFile = path.join(outputRoot, "robots.txt");
 if (!fs.existsSync(robotsFile) || !fs.readFileSync(robotsFile, "utf8").includes(`${siteUrl}/sitemap.xml`)) errors.push("robots.txt does not point to the target sitemap.");
-for (const asset of ["logo.png", "favicon.png", "assets/zec-architecture-break.webp", "assets/zec-hero-architecture.webp", "assets/og-image.jpg", "assets/design.css"]) {
+for (const asset of ["logo.png", "favicon.png", "assets/zec-architecture-break.webp", "assets/zec-hero-architecture.webp", "assets/zec-hero-placeholder.svg", "assets/og-image.jpg", "assets/design.css"]) {
   if (!fs.existsSync(path.join(outputRoot, asset))) errors.push(`Missing built asset: ${asset}`);
 }
 

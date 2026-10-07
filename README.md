@@ -35,16 +35,24 @@ Public contact, pricing, timelines, fit notes, founder/team details and location
 
 `npm run lint` uses Node.js built-ins so the project stays dependency-free. It checks JavaScript and inline-script syntax, parses the JSON data files, and checks CSS comments, strings and block braces. It is a syntax and structure check, not a stylistic ESLint rule set.
 
-The `/start` page posts to the Vercel Function at `/api/start`. The function validates each submission server-side, rejects a filled honeypot, and stores valid enquiries in Supabase. It does not accept submissions until `confirm.REPLY_TIME` has a confirmed value.
+The `/start` page posts to the Vercel Function at `/api/start`. The function validates each submission server-side, requires a client phone or WhatsApp number, rejects a filled honeypot, and appends valid enquiries to Google Sheets. It does not accept submissions until `confirm.REPLY_TIME` has a confirmed value.
 
-Apply the SQL migration in `supabase/migrations/` to the Supabase project. In the Vercel project settings, add these required server-side environment variables for Preview and Production:
+## Google Sheets setup
 
-- `SUPABASE_URL` — the project URL from Supabase.
-- `SUPABASE_SECRET_KEY` — a Supabase secret API key. Keep it server-side as a Vercel Secret; do not use a `NEXT_PUBLIC_` prefix or put it in browser code. Supabase secret keys have project-wide elevated access, so create one dedicated to this server endpoint and never commit it.
+The form uses a Google service account from the Vercel Function. Enable the Google Sheets API in a Google Cloud project, create a service account and JSON key, then share the destination spreadsheet with the service account email as an Editor. Google documents the [service account setup](https://developers.google.com/identity/protocols/oauth2/service-account) and the [Sheets append API](https://developers.google.com/workspace/sheets/api/reference/rest/v4/spreadsheets.values/append).
 
-The migration creates `public.contact_submissions`, enables row-level security, and limits Data API access to inserts by Supabase's server role. Anonymous and authenticated clients cannot read or write submissions. The Data API must be enabled with the `public` schema exposed for the Vercel Function to insert rows.
+Create a tab named `Enquiries` (or set another name in `GOOGLE_SHEETS_TAB_NAME`) and add these headers in row 1, in this order:
 
-Email alerts and the visitor auto-reply are optional. To enable them, also set `RESEND_API_KEY` and `CONTACT_FROM_EMAIL` to a verified Resend sender. `CONTACT_TO_EMAIL` can override the recipient; it defaults to the public contact email in `data/site-config.json`. Without Resend settings, submissions are still saved in Supabase, but no email is sent.
+`submitted_at`, `project_type`, `project_type_label`, `description`, `name`, `email`, `budget`, `budget_label`, `business_name`, `website`, `timeline`, `client_number`.
+
+Add these server-side environment variables to the Vercel Preview and Production environments:
+
+- `GOOGLE_SHEETS_SPREADSHEET_ID` — the ID between `/d/` and `/edit` in the spreadsheet URL.
+- `GOOGLE_SHEETS_SERVICE_ACCOUNT_EMAIL` — the service account email from its JSON key.
+- `GOOGLE_SHEETS_PRIVATE_KEY` — the `private_key` value from that JSON key. Store it as a Vercel Secret; preserve the PEM content and line breaks. Never prefix it with `NEXT_PUBLIC_` or commit the JSON key.
+- `GOOGLE_SHEETS_TAB_NAME` — optional; defaults to `Enquiries`.
+
+Rows are sent with Google Sheets `valueInputOption=RAW`, so user-provided text is kept as text rather than evaluated as formulas. Email alerts and the visitor auto-reply are optional. To enable them, also set `RESEND_API_KEY` and `CONTACT_FROM_EMAIL` to a verified Resend sender. `CONTACT_TO_EMAIL` can override the recipient; it defaults to the public contact email in `data/site-config.json`. Without Resend settings, submissions are still saved in Google Sheets, but no email is sent.
 
 `.env.example` lists variable names only. Keep actual values in ignored local environment files or the Vercel environment settings. The public email shown on the site is configured separately as `contact.email` in `data/site-config.json`.
 

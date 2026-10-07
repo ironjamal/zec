@@ -18,6 +18,7 @@ function filesIn(directory, extensions) {
 const javascriptFiles = [
   ...filesIn(path.join(repoRoot, "scripts"), [".mjs", ".js"]),
   ...filesIn(path.join(repoRoot, "api"), [".mjs", ".js"]),
+  ...filesIn(path.join(repoRoot, "lib"), [".mjs", ".js"]),
   ...filesIn(path.join(repoRoot, "tests"), [".mjs", ".js"])
 ];
 
