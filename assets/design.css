@@ -589,7 +589,7 @@ body.motion-ready .reveal-mask.is-visible > img { clip-path: inset(0 0 0 0); tra
 /* Phase 1 homepage and contact form */
 .hero:not(.service-hero) { background: #111; }
 .hero:not(.service-hero) .hero-frame { padding-top: clamp(7.25rem, 12vh, 9rem); }
-.hero:not(.service-hero) .hero-bottom { grid-template-columns: minmax(0, 1.2fr) minmax(17rem, .8fr); align-items: end; }
+.hero:not(.service-hero) .hero-bottom { grid-template-columns: minmax(0, 1fr); align-items: end; }
 .hero-title-copy { max-width: 11ch; font-size: clamp(3.55rem, 7.2vw, 7.2rem) !important; line-height: .92 !important; letter-spacing: -.075em !important; text-transform: none !important; }
 .hero-title-copy span { width: auto !important; padding: 0 0 .06em !important; }
 .hero:not(.service-hero) .hero-aside { position: relative; z-index: 2; max-width: 29rem; padding: clamp(1.1rem, 2.2vw, 1.8rem); background: rgba(15, 15, 15, .86); border: 1px solid rgba(255,255,255,.14); backdrop-filter: blur(8px); }
@@ -825,7 +825,7 @@ body.motion-ready .reveal-mask.is-visible > img { clip-path: inset(0 0 0 0); tra
 }
 
 @media (max-width: 900px) {
-  .hero:not(.service-hero) .hero-bottom { grid-template-columns: minmax(0, 1.1fr) minmax(16rem, .9fr); gap: 1.5rem; }
+  .hero:not(.service-hero) .hero-bottom { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
   .start-form-layout { grid-template-columns: minmax(0, 1fr) minmax(15rem, .8fr); gap: 2rem; }
   .process-timing { grid-template-columns: 1fr; gap: 1.5rem; }
 }
