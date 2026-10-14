@@ -11,188 +11,26 @@
       "basePath": "/zec"
     }
   },
-  "homepage": {
-    "idealClient": "For an owner, founder or marketing or operations lead at a small-to-mid business or early-stage startup without an in-house design and development team, looking for one partner.",
-    "aboutIntro": "The studio is founder-led, with specialized collaborators supporting project delivery.",
-    "processStages": [
-      { "name": "Discover", "description": "Understand the business, audience, goals and constraints.", "output": "Project brief" },
-      { "name": "Define", "description": "Set the first scope, structure and priorities.", "output": "Page map or workflow outline" },
-      { "name": "Design", "description": "Review the important journeys and interface before development.", "output": "Reviewed designs or prototype" },
-      { "name": "Build", "description": "Implement the agreed release around its intended use.", "output": "Working first release" },
-      { "name": "Test", "description": "Check key paths, refine the experience and address issues.", "output": "Reviewed and tested release" },
-      { "name": "Launch", "description": "Publish the approved work and agree the handover.", "output": "Launch and handover" }
-    ],
-    "processNotes": [
-      { "title": "What we need from you", "text": "Share the business context, the problem you need to solve and any existing material. The remaining requirements are defined during discovery." },
-      { "title": "Handover", "text": "Handover contents and any follow-on support are agreed in the written scope before work begins." }
-    ],
-    "conceptWork": [
-      {
-        "id": "product-catalogue",
-        "name": "Product catalogue",
-        "category": "E-commerce",
-        "outcome": "Give a considered product range a clear route from discovery to checkout.",
-        "tags": ["E-commerce", "Concept work"],
-        "preview": "shop"
-      },
-      {
-        "id": "service-website",
-        "name": "Service website",
-        "category": "Website",
-        "outcome": "Make a service offer, its approach and the next step easier to understand.",
-        "tags": ["Website", "Concept work"],
-        "preview": "website"
-      },
-      {
-        "id": "team-dashboard",
-        "name": "Team dashboard",
-        "category": "Web app",
-        "outcome": "Give a small team one clear view of open work and what needs attention.",
-        "tags": ["Web app", "Concept work"],
-        "preview": "dashboard"
-      }
-    ],
-    "situations": [
-      { "text": "The site still describes an earlier version of the business.", "offerId": "websites-stores" },
-      { "text": "I want to sell online with less friction.", "offerId": "websites-stores" },
-      { "text": "My team repeats the same work by hand.", "offerId": "web-apps-tools" },
-      { "text": "I'm launching a product and need a first version.", "offerId": "product-builds" }
-    ],
-    "offers": [
-      {
-        "id": "websites-stores",
-        "title": "Websites & stores",
-        "description": "Business websites, landing pages, redesigns, e-commerce and UI/UX.",
-        "fit": "For when the site no longer explains the business or needs to sell.",
-        "cta": "Start with a website",
-        "projectType": "websites-stores",
-        "serviceSlugs": ["websites", "e-commerce"]
-      },
-      {
-        "id": "web-apps-tools",
-        "title": "Web apps & internal tools",
-        "description": "Web applications, dashboards, custom systems, AI and workflow automation.",
-        "fit": "For when repeat work and handoffs slow the team.",
-        "cta": "Start with a web app",
-        "projectType": "web-apps-tools",
-        "serviceSlugs": ["web-applications", "digital-platforms", "custom-systems", "ai-automation"]
-      },
-      {
-        "id": "product-builds",
-        "title": "Product builds",
-        "description": "SaaS MVPs and platforms.",
-        "fit": "For when you're launching something new and need a first version to test.",
-        "cta": "Start with a product",
-        "projectType": "product-builds",
-        "serviceSlugs": ["saas-mvps"]
-      }
-    ],
-    "faqs": [
-      { "question": "What is the project minimum?", "answer": "Projects start from {PRICE_FLOOR}. The final price depends on the agreed scope; you receive a proposal before deciding whether to proceed." },
-      { "question": "How long does a project take?", "answer": "Typical timing: {TIMELINE_RANGES}. The schedule for your project is confirmed after its scope and review points are agreed." },
-      { "question": "Who is ZEC a fit for?", "answer": "{IDEAL_CLIENT} ZEC is not for {NOT_FOR}." },
-      { "question": "What should I bring to the first conversation?", "answer": "Share the business context, the problem you want to solve and any existing material you can. We can identify what else is needed before defining the scope." },
-      { "question": "What does handover include?", "answer": "Handover and any follow-on support should be agreed in the written scope before work begins." },
-      { "question": "Can we work remotely?", "answer": "ZEC's location and timezone are {LOCATION_TIMEZONE}. Working hours and meeting times can be agreed while the project is scoped." },
-      { "question": "What happens after launch?", "answer": "Agree in the scope what is included at launch and whether separate follow-on work is needed." }
-    ]
-  },
+  "projectFormUrl": "https://docs.google.com/forms/d/e/1FAIpQLScEimmQcJ5gNqr6mEWS4R6MxZFv5MR0CuxHeQQpt6AZggRN8A/viewform?usp=header",
   "contact": {
-    "whatsappEnabled": true,
-    "whatsappNumber": "01003246428",
-    "email": "zeccode.eg@gmail.com",
-    "bookingUrl": ""
+    "whatsappNumber": "{{WHATSAPP_NUMBER}}",
+    "email": "{{CONTACT_EMAIL}}",
+    "bookingUrl": "{{BOOKING_URL}}"
   },
-  "confirm": {
-    "REPLY_TIME": "Within 24 hours",
-    "PRICE_FLOOR": "8,000 EGP",
-    "BUDGET_TIERS": [
-      { "value": "under-7500-egp", "label": "Under 7,500 EGP" },
-      { "value": "7500-15000-egp", "label": "7,500–15,000 EGP" },
-      { "value": "15000-30000-egp", "label": "15,000–30,000 EGP" },
-      { "value": "30000-60000-egp", "label": "30,000–60,000 EGP" },
-      { "value": "60000-120000-egp", "label": "60,000–120,000 EGP" },
-      { "value": "120000-plus-egp", "label": "120,000+ EGP" },
-      { "value": "unsure", "label": "Not sure yet, help me scope" }
-    ],
-    "TIMELINE_RANGES": {
-      "landing_page": "5–10 days",
-      "business_website": "10–21 days",
-      "web_app": "3–8+ weeks"
-    },
-    "NOT_FOR": [
-      "Lowest-price shoppers",
-      "Template-in-a-weekend jobs",
-      "Enterprise procurement"
-    ],
-    "ECOMMERCE_OFFER_PLACEMENT": "Core service",
-    "FOUNDER": {
-      "name": "Abdelrahman Jamal",
-      "role": "Founder & Digital Product Strategist",
-      "photo": "/assets/founder-abdelrahman.png",
-      "credential": "Computer Science student with a background in marketing, branding, and digital products"
-    },
-    "TEAM_STRUCTURE": "Founder-led studio + specialized collaborators",
-    "LOCATION_TIMEZONE": "Egypt · GMT+3",
-    "WORK_ITEMS": [
-      {
-        "id": "sample-brief",
-        "label": "Sample deliverable",
-        "title": "Project brief outline",
-        "description": "A neutral example of the questions a brief can settle before scope and timing are agreed.",
-        "metaDescription": "An illustrative project brief outline shows the questions that help define the objective, audience, scope, dependencies and open decisions.",
-        "isPlaceholder": false,
-        "route": "/samples/project-brief",
-        "sections": [
-          { "heading": "Project objective", "text": "What should this project help people understand, decide or do?" },
-          { "heading": "Audience and context", "text": "Who needs this, and what are they trying to accomplish?" },
-          { "heading": "Current friction", "text": "Where does the present site or workflow create extra effort?" },
-          { "heading": "Scope boundary", "text": "Which pages, workflows or integrations belong in the first release?" },
-          { "heading": "Constraints and dependencies", "text": "What existing content, systems, access or review needs should be considered?" },
-          { "heading": "Open decisions", "text": "What needs an answer before scope, timing and estimate can be agreed?" }
-        ]
-      },
-      {
-        "id": "sample-page-map",
-        "label": "Sample deliverable",
-        "title": "Website page map",
-        "description": "An illustrative page structure for a small service-business website, not a client project.",
-        "metaDescription": "An illustrative website page map shows one possible structure for a small service business, from home and services to contact.",
-        "isPlaceholder": false,
-        "route": "/samples/page-map",
-        "sections": [
-          { "heading": "Home", "text": "Introduce the offer, help visitors choose a next step and answer first questions." },
-          { "heading": "Services overview", "text": "Show the main services together so visitors can compare where to start." },
-          { "heading": "Service detail", "text": "Explain who a service is for, what it includes and how the work proceeds." },
-          { "heading": "About", "text": "Describe the people, delivery approach and relevant background." },
-          { "heading": "Contact", "text": "Collect the information needed to understand an enquiry and explain what happens next." }
-        ]
-      }
-    ]
+  "showWork": false,
+  "workPlaceholder": {
+    "title": "{{PROJECT_TITLE}}",
+    "category": "{{PROJECT_CATEGORY}}",
+    "description": "{{PROJECT_DESCRIPTION}}",
+    "image": "{{PROJECT_IMAGE}}",
+    "imageAlt": "{{PROJECT_IMAGE_ALT}}",
+    "url": "{{PROJECT_URL}}"
   },
-  "projectTypes": [
-    { "value": "website", "label": "Website or landing page" },
-    { "value": "redesign", "label": "Redesign" },
-    { "value": "store", "label": "Online store" },
-    { "value": "web-app", "label": "Web app or internal tool" },
-    { "value": "saas", "label": "SaaS MVP or platform" },
-    { "value": "automation", "label": "Automation or AI" },
-    { "value": "unsure", "label": "Not sure yet" }
-  ],
-  "projectTypeAliases": {
-    "websites": "website",
-    "website": "website",
-    "stores": "store",
-    "e-commerce": "store",
-    "web-apps": "web-app",
-    "web-app": "web-app",
-    "product": "saas",
-    "product-builds": "saas",
-    "websites-stores": "website",
-    "web-apps-tools": "web-app"
-  },
-  "autoReplyTemplate": {
-    "subject": "We received your note",
-    "body": "Thanks for getting in touch with ZEC. Here is what happens next:\n\n1. We’ll reply within {REPLY_TIME} with any questions or a fit check.\n2. If useful, we can arrange an optional short intro call{BOOKING_LINK}.\n3. If we’re a fit, we’ll send a scoped proposal with price and timeline. No work starts until scope is approved.\n\nZEC"
+  "showTeam": false,
+  "teamPlaceholder": {
+    "name": "{{TEAM_MEMBER_NAME}}",
+    "role": "{{TEAM_MEMBER_ROLE}}",
+    "photo": "{{TEAM_MEMBER_PHOTO}}",
+    "photoAlt": "{{TEAM_MEMBER_PHOTO_ALT}}"
   }
 }

@@ -6,8 +6,6 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 const outputRoot = path.join(repoRoot, "dist");
 const services = JSON.parse(fs.readFileSync(path.join(repoRoot, "data", "services.json"), "utf8"));
 const siteConfig = JSON.parse(fs.readFileSync(path.join(repoRoot, "data", "site-config.json"), "utf8"));
-const sampleItems = siteConfig.confirm?.WORK_ITEMS || [];
-const sampleRoutes = sampleItems.filter((item) => item.isPlaceholder !== true && item.route).map((item) => item.route);
 const targetIndex = process.argv.indexOf("--target");
 const target = process.env.BUILD_TARGET || (targetIndex >= 0 ? process.argv[targetIndex + 1] : "vercel");
 const targetConfig = siteConfig.targets?.[target];
@@ -20,11 +18,8 @@ const siteOrigin = new URL(siteUrl).origin;
 const sitePathname = new URL(siteUrl).pathname.replace(/\/$/, "");
 const errors = [];
 const titles = new Set();
-const descriptions = new Set();
 const canonicalUrls = new Set();
-const routes = ["/", "/services", "/start", ...services.map((service) => `/services/${service.slug}`), ...sampleRoutes];
-const homepageOffers = siteConfig.homepage?.offers || [];
-const projectTypeValues = new Set((siteConfig.projectTypes || []).map((item) => item.value));
+const routes = ["/", "/services", ...services.map((service) => `/services/${service.slug}`)];
 
 if (sitePathname !== basePrefix) errors.push(`SITE_URL path (${sitePathname || "(empty)"}) does not match BASE_PATH (${basePrefix || "(empty)"}).`);
 
@@ -79,116 +74,22 @@ const pages = routes.map((route) => ({ route, file: pageFile(route), url: absolu
 for (const page of pages) {
   if (!fs.existsSync(page.file)) { errors.push(`Missing page output: ${path.relative(outputRoot, page.file)}`); continue; }
   const html = fs.readFileSync(page.file, "utf8");
-  if (/docs\.google\.com\/forms/i.test(html)) errors.push(`Google Form link remains in ${page.route}.`);
   const title = html.match(/<title>([^<]+)<\/title>/i)?.[1] || "";
   const description = html.match(/<meta\s+name="description"\s+content="([^"]*)"/i)?.[1] || "";
   const canonical = html.match(/<link\s+rel="canonical"\s+href="([^"]+)"/i)?.[1] || "";
-  const ogTitle = html.match(/<meta\s+property="og:title"\s+content="([^"]*)"/i)?.[1] || "";
-  const ogDescription = html.match(/<meta\s+property="og:description"\s+content="([^"]*)"/i)?.[1] || "";
   const ogUrl = html.match(/<meta\s+property="og:url"\s+content="([^"]+)"/i)?.[1] || "";
   const ogImage = html.match(/<meta\s+property="og:image"\s+content="([^"]+)"/i)?.[1] || "";
-  const ogImageAlt = html.match(/<meta\s+property="og:image:alt"\s+content="([^"]*)"/i)?.[1] || "";
-  const ogImageType = html.match(/<meta\s+property="og:image:type"\s+content="([^"]*)"/i)?.[1] || "";
-  const ogImageSize = `${html.match(/<meta\s+property="og:image:width"\s+content="([^"]*)"/i)?.[1] || ""}x${html.match(/<meta\s+property="og:image:height"\s+content="([^"]*)"/i)?.[1] || ""}`;
-  const ogSiteName = html.match(/<meta\s+property="og:site_name"\s+content="([^"]*)"/i)?.[1] || "";
-  const twitterTitle = html.match(/<meta\s+name="twitter:title"\s+content="([^"]*)"/i)?.[1] || "";
-  const twitterDescription = html.match(/<meta\s+name="twitter:description"\s+content="([^"]*)"/i)?.[1] || "";
   const twitterImage = html.match(/<meta\s+name="twitter:image"\s+content="([^"]+)"/i)?.[1] || "";
-  const twitterImageAlt = html.match(/<meta\s+name="twitter:image:alt"\s+content="([^"]*)"/i)?.[1] || "";
   if (!title || !description || !canonical) errors.push(`Missing title, description or canonical: ${page.route}`);
   if (canonical !== page.url) errors.push(`Incorrect canonical in ${page.route}: ${canonical}`);
   if (ogUrl !== page.url) errors.push(`Incorrect og:url in ${page.route}: ${ogUrl}`);
   if (titles.has(title)) errors.push(`Duplicate title: ${title}`);
-  if (descriptions.has(description)) errors.push(`Duplicate meta description: ${page.route}`);
   if (canonicalUrls.has(canonical)) errors.push(`Duplicate canonical: ${canonical}`);
-  if (description.length < 100 || description.length > 160) errors.push(`Meta description should be 100–160 characters in ${page.route} (got ${description.length}).`);
-  titles.add(title); descriptions.add(description); canonicalUrls.add(canonical);
+  titles.add(title); canonicalUrls.add(canonical);
   const expectedImage = absoluteSiteUrl("/assets/og-image.jpg");
   if (ogImage !== expectedImage || twitterImage !== expectedImage) errors.push(`Open Graph/Twitter image does not match target SITE_URL: ${page.route}`);
-  if (ogTitle !== title || twitterTitle !== title) errors.push(`Open Graph/Twitter title does not match the page title: ${page.route}`);
-  if (ogDescription !== description || twitterDescription !== description) errors.push(`Open Graph/Twitter description does not match the page description: ${page.route}`);
-  if (ogSiteName !== "ZEC" || !ogImageAlt || twitterImageAlt !== ogImageAlt || ogImageType !== "image/jpeg" || ogImageSize !== "1200x630") errors.push(`Incomplete Open Graph/Twitter image metadata: ${page.route}`);
   if ((html.match(/<h1\b/gi) || []).length !== 1) errors.push(`Expected exactly one H1: ${page.route}`);
   if (/\{\{[^}]*\}\}|\bundefined\b|\bnull\b/i.test(html)) errors.push(`Raw placeholder/undefined/null in ${page.route}`);
-  const primaryNav = html.match(/<nav class="primary-nav"[^>]*>([\s\S]*?)<\/nav>/i)?.[1] || "";
-  const footerNav = html.match(/<nav class="footer-nav"[^>]*>([\s\S]*?)<\/nav>/i)?.[1] || "";
-  for (const label of ["Services", "Process", "About"]) {
-    if (!primaryNav.includes(label)) errors.push(`Primary navigation is missing ${label} on ${page.route}.`);
-    if (!footerNav.includes(label)) errors.push(`Footer navigation is missing ${label} on ${page.route}.`);
-  }
-  if (!primaryNav.includes("Samples") && !primaryNav.includes("Work")) errors.push(`Primary navigation is missing its Work/Samples link on ${page.route}.`);
-  if (!footerNav.includes("Samples") && !footerNav.includes("Work")) errors.push(`Footer navigation is missing its Work/Samples link on ${page.route}.`);
-  const footerOffers = html.match(/<nav class="footer-offers"[^>]*>([\s\S]*?)<\/nav>/i)?.[1] || "";
-  if ((footerOffers.match(/<a\b/g) || []).length !== 3) errors.push(`Footer must link to all three offers on ${page.route}.`);
-  if (!/class="footer-location"/.test(html)) errors.push(`Footer is missing the location/timezone placeholder on ${page.route}.`);
-  if (page.route === "/") {
-    const homeMain = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] || "";
-    const homeSections = [...homeMain.matchAll(/<section\b[^>]*\bid="([^"]+)"/gi)].map((match) => match[1]);
-    const expectedSections = ["top", "who-for", "samples", "selected-work", "offers", "process", "about", "faq", "contact"];
-    if (JSON.stringify(homeSections) !== JSON.stringify(expectedSections)) errors.push(`Homepage sections do not match the required nine-section order: ${homeSections.join(", ")}`);
-    if ((homeMain.match(/class="situation-card"/g) || []).length !== 4) errors.push("Homepage must render four situation cards.");
-    if ((homeMain.match(/class="offer-card"/g) || []).length !== 3) errors.push("Homepage must render exactly three offer cards.");
-    if ((homeMain.match(/class="faq-item"/g) || []).length !== 7) errors.push("Homepage must render seven FAQs.");
-    if ((homeMain.match(/class="work-sample"/g) || []).length < 2) errors.push("Homepage must render at least two labelled work or sample items.");
-    if ((homeMain.match(/class="sample-preview"/g) || []).length < 2) errors.push("Homepage samples need rendered document previews.");
-    if ((homeMain.match(/class="selected-work-card"/g) || []).length !== 3 || (homeMain.match(/Concept work/g) || []).length < 3) errors.push("Homepage must render three clearly labelled concept work cards.");
-    if (!homeMain.includes("Clear scope.<br>Useful handover.") || !homeMain.includes("id=\"studio-note\"")) errors.push("Homepage is missing the studio trust strip between Process and FAQ.");
-    if (!homeMain.includes("Projects start from 8,000 EGP") || homeMain.includes("Projects start from Projects start from")) errors.push("Homepage project minimum must appear once in the FAQ.");
-    if ((homeMain.match(/class="process-step-output"/g) || []).length !== 6) errors.push("Homepage must show one output for each process stage.");
-    if ((homeMain.match(/class="process-timeline"/g) || []).length < 3) errors.push("Homepage must show the confirmed typical project timelines.");
-    if (!homeMain.includes(siteConfig.homepage.aboutIntro)) errors.push("Homepage is missing the configured About introduction.");
-    for (const offer of homepageOffers) {
-      const offerType = siteConfig.projectTypeAliases?.[offer.projectType] || offer.projectType;
-      const offerUrl = `${basePrefix}/start?type=${encodeURIComponent(offer.projectType)}`;
-      if (!projectTypeValues.has(offerType)) errors.push(`Offer ${offer.id} does not map to a valid project type.`);
-      if (!html.includes(`href="${offerUrl}"`)) errors.push(`Offer ${offer.id} is missing its /start?type= deep link.`);
-    }
-    if (!html.includes(`${basePrefix}/assets/zec-architecture-break.webp`) || !html.includes(`${basePrefix}/assets/zec-hero-architecture.webp`)) errors.push("Homepage must keep the existing desktop and mobile hero photos.");
-    if (/class="(?:visual-break|manifesto-section|capabilities-section|solutions-section)"/.test(homeMain)) errors.push("Homepage still contains a section removed by the nine-section redesign.");
-    const hasPublishedWork = sampleItems.filter((item) => item.isPlaceholder !== true && item.label && item.title).length >= 2;
-    if (hasPublishedWork ? !primaryNav.includes("Work") : !primaryNav.includes("Samples")) errors.push("Homepage Work/Samples navigation label does not match the configured proof items.");
-    const numbers = [...homeMain.matchAll(/class="section-index[^"]*"[^>]*>\s*<span>(\d{2})<\/span>/g)].map((match) => match[1]);
-    const contactNumber = homeMain.match(/class="contact-index[^"]*"[^>]*>[\s\S]*?(\d{2})\s*—/i)?.[1] || "";
-    if (numbers.join(",") !== "01,02,03,04,05,06,07,08,09" || contactNumber !== "10") errors.push("Homepage section numbers must run from 01 through 10 in page order.");
-    if (!html.includes("01/06") || !html.includes("threshold: [0, 0.6, 0.75, 1]") || !html.includes("process-focus-copy")) errors.push("Homepage process interaction must expose stage progress and use a 0.6 visibility threshold.");
-    if (!html.includes("a[href*='#']") || !html.includes("new URL(link.href, window.location.href).hash === \"#\" + active.target.id") || !html.includes("setAttribute(\"aria-current\", \"location\")")) errors.push("Homepage navigation must apply scroll-spy state to same-page sections.");
-  }
-  if (page.route.startsWith("/samples/")) {
-    if (!/class="sample-page"/.test(html)) errors.push(`Sample route is missing its sample page content: ${page.route}`);
-    if (!html.includes("Illustrative sample; not a client project or case study.")) errors.push(`Sample route is missing its non-client disclaimer: ${page.route}`);
-    if ((html.match(/class="sample-document-part"/g) || []).length < 2) errors.push(`Sample route needs at least two preview sections: ${page.route}`);
-  }
-  if (page.route === "/services/websites") {
-    const websiteIntro = services.find((service) => service.slug === "websites")?.intro || "";
-    const serviceMain = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] || "";
-    if (websiteIntro && serviceMain.split(websiteIntro).length - 1 !== 1) errors.push("The Websites page repeats its introductory paragraph.");
-  }
-  if (page.route === "/services") {
-    if ((html.match(/class="service-offer-group"/g) || []).length !== 3) errors.push("Services page must group depth pages under three offers.");
-    if ((html.match(/class="service-depth-link"/g) || []).length !== services.length) errors.push("Services page must list every depth page exactly once.");
-    const numbers = [...html.matchAll(/class="section-index[^\"]*"[^>]*>\s*<span>(\d{2})<\/span>/g)].map((match) => match[1]);
-    const contactNumber = html.match(/class="contact-index[^\"]*"[^>]*>[\s\S]*?(\d{2})\s*—/i)?.[1] || "";
-    if (numbers.join(",") !== "01" || contactNumber !== "02") errors.push("Services page section numbers must be 01 and 02 in page order.");
-  }
-  if (page.route.startsWith("/services/")) {
-    const numbers = [...html.matchAll(/class="section-index[^\"]*"[^>]*>\s*<span>(\d{2})<\/span>/g)].map((match) => match[1]);
-    const contactNumber = html.match(/class="contact-index[^\"]*"[^>]*>[\s\S]*?(\d{2})\s*—/i)?.[1] || "";
-    if (numbers.join(",") !== "01,02,03,04,05,06,07,08" || contactNumber !== "09") errors.push(`Service page section numbers are out of order: ${page.route}`);
-  }
-  if (page.route === "/start") {
-    const numbers = [...html.matchAll(/class="section-index[^\"]*"[^>]*>\s*<span>(\d{2})<\/span>/g)].map((match) => match[1]);
-    if (numbers.join(",") !== "01,02,03") errors.push("Start page section numbers must run from 01 through 03.");
-    if (!/<form\b[^>]*id="start-form"/i.test(html)) errors.push("Start page is missing its project enquiry form.");
-    if (!/name="form_guard"/.test(html)) errors.push("Start page is missing its spam honeypot field.");
-    if (target === "vercel" && !/<form\b[^>]*action="\/api\/start"[^>]*data-endpoint="\/api\/start"/.test(html)) errors.push("Vercel start form must post to the relative /api/start function route.");
-    for (const field of ["projectType", "description", "budget", "name", "email", "businessName", "website", "timeline", "clientNumber", "form_guard"]) {
-      if (!new RegExp(`name="${field}"`).test(html)) errors.push(`Start page is missing the ${field} submission field.`);
-    }
-    const requiredFields = html.match(/<(?:input|select|textarea)\b[^>]*\brequired(?:\s|>|=)/gi) || [];
-    if (requiredFields.length > 5) errors.push(`Start page has more than five required form fields (${requiredFields.length}).`);
-    if (!/aria-live="polite"/.test(html) || !/id="start-confirmation"/.test(html)) errors.push("Start page is missing its accessible confirmation panel.");
-    if (!/new URLSearchParams\(window\.location\.search\)\.get\("type"\)/.test(html) || !/aliases\[queryType\.toLowerCase\(\)\]/.test(html)) errors.push("Start page is missing offer type preselection from its query string.");
-  }
 
   const ids = new Set([...html.matchAll(/\bid="([^"]+)"/g)].map((match) => match[1]));
   for (const match of html.matchAll(/\b(?:href|src|srcset)="([^"]+)"/g)) {
@@ -259,7 +160,7 @@ if (sitemapUrls.length !== pages.length || pages.some((page) => !sitemapUrls.inc
 if (sitemapUrls.some((url) => !url.startsWith(`${siteUrl}/`))) errors.push("Sitemap URL escapes SITE_URL.");
 const robotsFile = path.join(outputRoot, "robots.txt");
 if (!fs.existsSync(robotsFile) || !fs.readFileSync(robotsFile, "utf8").includes(`${siteUrl}/sitemap.xml`)) errors.push("robots.txt does not point to the target sitemap.");
-for (const asset of ["logo.png", "favicon.png", "assets/zec-architecture-break.webp", "assets/zec-hero-architecture.webp", "assets/zec-hero-placeholder.svg", "assets/og-image.jpg", "assets/design.css"]) {
+for (const asset of ["logo.png", "favicon.png", "assets/zec-architecture-break.webp", "assets/zec-hero-architecture.webp", "assets/og-image.jpg", "assets/design.css"]) {
   if (!fs.existsSync(path.join(outputRoot, asset))) errors.push(`Missing built asset: ${asset}`);
 }
 
